@@ -25,27 +25,35 @@ import { ModeToggle } from '@/components/ui/mode-toggle';
 import { getSidebarRoutes } from '@/config/routes';
 import { Link, useLocation } from 'react-router-dom';
 import type { RouteConfig } from '@/config/routes';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
 
 interface BaseLayoutProps {
     children: React.ReactNode;
 }
-
-const hasPermission = (permissions: string[]): boolean => {
-    // Still need to implement permissions
-    return true;
-};
 
 const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
     const { user, logout } = useAuth();
     const location = useLocation();
     const navigationItems = getSidebarRoutes();
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    const hasPermission = (permissions: string[]): boolean => {
+        if (!permissions || permissions.length === 0) return true;
+        if (!user?.role?.permissions) return false;
+        return permissions.every(required =>
+            user.role.permissions?.some(p => p.name === required)
+        );
+    };
 
     const handleLogout = async () => {
+        setIsLoggingOut(true);
         try {
             await logout();
         } catch (error) {
             console.error('Logout error:', error);
+        } finally {
+            setIsLoggingOut(false);
         }
     };
 
@@ -140,7 +148,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
                     <SidebarContent>
                         <SidebarGroup>
                             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-                                Navigation
+                                Navegación
                             </SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
@@ -167,15 +175,19 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
                                 <div className="group-data-[collapsible=icon]:hidden">
                                     <ModeToggle />
                                 </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleLogout}
-                                    className="text-muted-foreground hover:text-destructive group-data-[collapsible=icon]:p-2"
-                                    title="Logout"
-                                >
-                                    <LogOut className="h-4 w-4" />
-                                </Button>
+                                {isLoggingOut ? (
+                                    <Spinner variant='ellipsis' />
+                                ) : (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleLogout}
+                                        className="text-muted-foreground hover:text-destructive group-data-[collapsible=icon]:p-2"
+                                        title="Logout"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                         {/* User avatar and controls when collapsed */}

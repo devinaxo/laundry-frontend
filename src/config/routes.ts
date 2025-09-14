@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Home, ClipboardList, Users, Package, Shirt, BarChart3, Settings, Plus, UserPlus, PackagePlus, ShirtIcon, FileText } from 'lucide-react';
+import { ClipboardList, Home, Key, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
 import { lazy } from 'react';
 
 // Lazy load components
@@ -12,47 +12,45 @@ const InventoryPage = lazy(() => import('@/pages/mock/InventoryPage'));
 const CreateInventoryPage = lazy(() => import('@/pages/mock/CreateInventoryPage'));
 const ServicesPage = lazy(() => import('@/pages/mock/ServicesPage'));
 const CreateServicePage = lazy(() => import('@/pages/mock/CreateServicePage'));
-const ReportsPage = lazy(() => import('@/pages/mock/ReportsPage'));
-const CreateReportPage = lazy(() => import('@/pages/mock/CreateReportPage'));
 const SettingsPage = lazy(() => import('@/pages/mock/SettingsPage'));
 const UserManagementPage = lazy(() => import('@/pages/mock/UserManagementPage'));
 
-// Mock perms
+// Actual perms
 export const Permission = {
-    // Dashboard
-    VIEW_DASHBOARD: 'view_dashboard',
-    
-    // Orders
-    VIEW_ORDERS: 'view_orders',
-    CREATE_ORDER: 'create_order',
-    EDIT_ORDER: 'edit_order',
-    DELETE_ORDER: 'delete_order',
-    
-    // Customers
-    VIEW_CUSTOMERS: 'view_customers',
-    CREATE_CUSTOMER: 'create_customer',
-    EDIT_CUSTOMER: 'edit_customer',
-    DELETE_CUSTOMER: 'delete_customer',
-    
-    // Inventory
-    VIEW_INVENTORY: 'view_inventory',
-    CREATE_INVENTORY: 'create_inventory',
-    EDIT_INVENTORY: 'edit_inventory',
-    DELETE_INVENTORY: 'delete_inventory',
-    
-    // Services
-    VIEW_SERVICES: 'view_services',
-    CREATE_SERVICE: 'create_service',
-    EDIT_SERVICE: 'edit_service',
-    DELETE_SERVICE: 'delete_service',
-    
-    // Reports
-    VIEW_REPORTS: 'view_reports',
-    CREATE_REPORT: 'create_report',
-    
-    // Settings
-    VIEW_SETTINGS: 'view_settings',
-    MANAGE_USERS: 'manage_users',
+    VIEW_DASHBOARD: 'viewDashboard',
+
+    CREATE_USERS: 'createUser',
+    VIEW_USERS: 'viewUser',
+    EDIT_USERS: 'editUser',
+    DELETE_USERS: 'deleteUser',
+
+    CREATE_ROLES: 'createRole',
+    VIEW_ROLES: 'viewRole',
+    EDIT_ROLES: 'editRole',
+
+    CREATE_PERMISSIONS: 'createPermission',
+    VIEW_PERMISSIONS: 'viewPermission',
+    EDIT_PERMISSIONS: 'editPermission',
+
+    CREATE_CLIENTS: 'createClient',
+    VIEW_CLIENTS: 'viewClient',
+    EDIT_CLIENTS: 'editClient',
+    DELETE_CLIENTS: 'deleteClient',
+
+    CREATE_CATEGORIES: 'createCategory',
+    VIEW_CATEGORIES: 'viewCategory',
+    EDIT_CATEGORIES: 'editCategory',
+    DELETE_CATEGORIES: 'deleteCategory',
+
+    CREATE_SUBCATEGORIES: 'createSubcategory',
+    VIEW_SUBCATEGORIES: 'viewSubcategory',
+    EDIT_SUBCATEGORIES: 'editSubcategory',
+    DELETE_SUBCATEGORIES: 'deleteSubcategory',
+
+    CREATE_ORDERS: 'createOrder',
+    VIEW_ORDERS: 'viewOrder',
+    EDIT_ORDERS: 'editOrder',
+    DELETE_ORDERS: 'deleteOrder',
 } as const;
 
 export type PermissionType = typeof Permission[keyof typeof Permission];
@@ -80,9 +78,99 @@ export const routes: RouteConfig[] = [
         permissions: [Permission.VIEW_DASHBOARD],
     },
     {
+        path: '/users',
+        component: UserManagementPage,
+        title: 'Usuarios',
+        icon: Users,
+        showInSidebar: true,
+        requiresAuth: true,
+        permissions: [Permission.VIEW_USERS],
+        isParent: true,
+        children: [
+            {
+                path: '/list',
+                component: SettingsPage,
+                title: 'Lista de usuarios',
+                icon: Users,
+                showInSidebar: true,
+                requiresAuth: true,
+                permissions: [Permission.VIEW_USERS],
+            },
+            {
+                path: '/new',
+                component: UserManagementPage,
+                title: 'Crear usuario',
+                icon: UserPlus,
+                showInSidebar: true,
+                requiresAuth: true,
+                permissions: [Permission.CREATE_USERS],
+            },
+        ],
+    },
+    {
+        path: '/roles',
+        component: ServicesPage,
+        title: 'Roles',
+        icon: UserCog,
+        showInSidebar: true,
+        requiresAuth: true,
+        permissions: [Permission.VIEW_ROLES],
+        isParent: true,
+        children: [
+            {
+                path: '/list',
+                component: ServicesPage,
+                title: 'Ver roles',
+                icon: UserCog,
+                showInSidebar: true,
+                requiresAuth: true,
+                permissions: [Permission.VIEW_ROLES],
+            },
+            {
+                path: '/create',
+                component: CreateServicePage,
+                title: 'Crear rol',
+                icon: Plus,
+                showInSidebar: true,
+                requiresAuth: true,
+                permissions: [Permission.CREATE_ROLES],
+            },
+        ],
+    },
+    {
+        path: '/permissions',
+        component: ServicesPage,
+        title: 'Permisos',
+        icon: Key,
+        showInSidebar: true,
+        requiresAuth: true,
+        permissions: [Permission.VIEW_PERMISSIONS],
+        isParent: true,
+        children: [
+            {
+                path: '/list',
+                component: ServicesPage,
+                title: 'Ver permisos',
+                icon: Key,
+                showInSidebar: true,
+                requiresAuth: true,
+                permissions: [Permission.VIEW_PERMISSIONS],
+            },
+            {
+                path: '/create',
+                component: CreateServicePage,
+                title: 'Crear permiso',
+                icon: Plus,
+                showInSidebar: true,
+                requiresAuth: true,
+                permissions: [Permission.CREATE_PERMISSIONS],
+            },
+        ],
+    },
+    {
         path: '/orders',
         component: OrdersPage,
-        title: 'Orders',
+        title: 'Órdenes',
         icon: ClipboardList,
         showInSidebar: true,
         requiresAuth: true,
@@ -90,172 +178,112 @@ export const routes: RouteConfig[] = [
         isParent: true,
         children: [
             {
-                path: '/orders',
+                path: '/list',
                 component: OrdersPage,
-                title: 'View Orders',
+                title: 'Ver órdenes',
                 icon: ClipboardList,
                 showInSidebar: true,
                 requiresAuth: true,
                 permissions: [Permission.VIEW_ORDERS],
             },
             {
-                path: '/orders/create',
+                path: '/new',
                 component: CreateOrderPage,
-                title: 'Create Order',
+                title: 'Crear órden',
                 icon: Plus,
                 showInSidebar: true,
                 requiresAuth: true,
-                permissions: [Permission.CREATE_ORDER],
+                permissions: [Permission.CREATE_ORDERS],
             },
         ],
     },
     {
-        path: '/customers',
+        path: '/clients',
         component: CustomersPage,
-        title: 'Customers',
+        title: 'Clientes',
         icon: Users,
         showInSidebar: true,
         requiresAuth: true,
-        permissions: [Permission.VIEW_CUSTOMERS],
+        permissions: [Permission.VIEW_CLIENTS],
         isParent: true,
         children: [
             {
-                path: '/customers',
+                path: '/list',
                 component: CustomersPage,
-                title: 'View Customers',
+                title: 'Ver clientes',
                 icon: Users,
                 showInSidebar: true,
                 requiresAuth: true,
-                permissions: [Permission.VIEW_CUSTOMERS],
+                permissions: [Permission.VIEW_CLIENTS],
             },
             {
-                path: '/customers/create',
+                path: '/new',
                 component: CreateCustomerPage,
-                title: 'Add Customer',
+                title: 'Agregar cliente',
                 icon: UserPlus,
                 showInSidebar: true,
                 requiresAuth: true,
-                permissions: [Permission.CREATE_CUSTOMER],
+                permissions: [Permission.CREATE_CLIENTS],
             },
         ],
     },
     {
-        path: '/inventory',
+        path: '/categories',
         component: InventoryPage,
-        title: 'Inventory',
+        title: 'Categorías de Items',
         icon: Package,
         showInSidebar: true,
         requiresAuth: true,
-        permissions: [Permission.VIEW_INVENTORY],
+        permissions: [Permission.VIEW_CATEGORIES],
         isParent: true,
         children: [
             {
-                path: '/inventory',
+                path: '/list',
                 component: InventoryPage,
-                title: 'View Inventory',
+                title: 'Ver categorías',
                 icon: Package,
                 showInSidebar: true,
                 requiresAuth: true,
-                permissions: [Permission.VIEW_INVENTORY],
+                permissions: [Permission.VIEW_CATEGORIES],
             },
             {
-                path: '/inventory/create',
+                path: '/new',
                 component: CreateInventoryPage,
-                title: 'Add Item',
+                title: 'Agregar categoría',
                 icon: PackagePlus,
                 showInSidebar: true,
                 requiresAuth: true,
-                permissions: [Permission.CREATE_INVENTORY],
+                permissions: [Permission.CREATE_CATEGORIES],
             },
         ],
     },
     {
-        path: '/services',
-        component: ServicesPage,
-        title: 'Services',
-        icon: Shirt,
+        path: '/subcategories',
+        component: InventoryPage,
+        title: 'Subcategorías de Items',
+        icon: Package,
         showInSidebar: true,
         requiresAuth: true,
-        permissions: [Permission.VIEW_SERVICES],
+        permissions: [Permission.VIEW_SUBCATEGORIES],
         isParent: true,
         children: [
             {
-                path: '/services',
-                component: ServicesPage,
-                title: 'View Services',
-                icon: Shirt,
+                path: '/list',
+                component: InventoryPage,
+                title: 'Ver subcategorías',
+                icon: Package,
                 showInSidebar: true,
                 requiresAuth: true,
-                permissions: [Permission.VIEW_SERVICES],
+                permissions: [Permission.VIEW_SUBCATEGORIES],
             },
             {
-                path: '/services/create',
-                component: CreateServicePage,
-                title: 'Add Service',
-                icon: ShirtIcon,
+                path: '/new',
+                component: CreateInventoryPage,
+                title: 'Agregar subcategoría',
+                icon: PackagePlus,
                 showInSidebar: true,
                 requiresAuth: true,
-                permissions: [Permission.CREATE_SERVICE],
-            },
-        ],
-    },
-    {
-        path: '/reports',
-        component: ReportsPage,
-        title: 'Reports',
-        icon: BarChart3,
-        showInSidebar: true,
-        requiresAuth: true,
-        permissions: [Permission.VIEW_REPORTS],
-        isParent: true,
-        children: [
-            {
-                path: '/reports',
-                component: ReportsPage,
-                title: 'View Reports',
-                icon: BarChart3,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.VIEW_REPORTS],
-            },
-            {
-                path: '/reports/create',
-                component: CreateReportPage,
-                title: 'Generate Report',
-                icon: FileText,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.CREATE_REPORT],
-            },
-        ],
-    },
-    {
-        path: '/settings',
-        component: SettingsPage,
-        title: 'Settings',
-        icon: Settings,
-        showInSidebar: true,
-        requiresAuth: true,
-        permissions: [Permission.VIEW_SETTINGS],
-        isParent: true,
-        children: [
-            {
-                path: '/settings',
-                component: SettingsPage,
-                title: 'General Settings',
-                icon: Settings,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.VIEW_SETTINGS],
-            },
-            {
-                path: '/settings/users',
-                component: UserManagementPage,
-                title: 'User Management',
-                icon: Users,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.MANAGE_USERS],
+                permissions: [Permission.CREATE_SUBCATEGORIES],
             },
         ],
     },
@@ -267,14 +295,14 @@ export const getRouteByPath = (path: string) => routes.find(route => route.path 
 
 export const getAllRoutes = (): RouteConfig[] => {
     const flatRoutes: RouteConfig[] = [];
-    
+
     const addRoute = (route: RouteConfig) => {
         flatRoutes.push(route);
         if (route.children) {
             route.children.forEach(addRoute);
         }
     };
-    
+
     routes.forEach(addRoute);
     return flatRoutes;
 };
