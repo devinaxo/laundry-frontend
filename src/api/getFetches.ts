@@ -2,6 +2,6 @@ import instance from '../lib/axios';
 import type { UserWithPermissions } from '../types/api';
 
 export const getCurrentUser = (): Promise<UserWithPermissions> => {
-    return instance.get('/user')
+    return instance.get('/currentUser')
         .then((response) => response.data);
 };
