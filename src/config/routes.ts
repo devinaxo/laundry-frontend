@@ -55,9 +55,33 @@ export const Permission = {
 
 export type PermissionType = typeof Permission[keyof typeof Permission];
 
+const buildFullPath = (parentPath: string, childPath: string): string => {
+    if (childPath.startsWith('/')) {
+        return parentPath + childPath;
+    }
+    return parentPath + '/' + childPath;
+};
+
+const processRoutes = (routes: RouteConfig[], parentPath = ''): RouteConfig[] => {
+    return routes.map(route => {
+        const fullPath = parentPath ? buildFullPath(parentPath, route.path) : route.path;
+        
+        const processedRoute: RouteConfig = {
+            ...route,
+            path: fullPath,
+        };
+
+        if (route.children) {
+            processedRoute.children = processRoutes(route.children, fullPath);
+        }
+
+        return processedRoute;
+    });
+};
+
 export interface RouteConfig {
     path: string;
-    component: React.ComponentType;
+    component?: React.ComponentType;
     title: string;
     icon: LucideIcon;
     showInSidebar: boolean;
@@ -79,7 +103,6 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/users',
-        component: UserManagementPage,
         title: 'Usuarios',
         icon: Users,
         showInSidebar: true,
@@ -109,7 +132,6 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/roles',
-        component: ServicesPage,
         title: 'Roles',
         icon: UserCog,
         showInSidebar: true,
@@ -139,7 +161,6 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/permissions',
-        component: ServicesPage,
         title: 'Permisos',
         icon: Key,
         showInSidebar: true,
@@ -169,7 +190,6 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/orders',
-        component: OrdersPage,
         title: 'Órdenes',
         icon: ClipboardList,
         showInSidebar: true,
@@ -199,7 +219,6 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/clients',
-        component: CustomersPage,
         title: 'Clientes',
         icon: Users,
         showInSidebar: true,
@@ -229,7 +248,6 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/categories',
-        component: InventoryPage,
         title: 'Categorías de Items',
         icon: Package,
         showInSidebar: true,
@@ -259,7 +277,6 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/subcategories',
-        component: InventoryPage,
         title: 'Subcategorías de Items',
         icon: Package,
         showInSidebar: true,
@@ -289,20 +306,27 @@ export const routes: RouteConfig[] = [
     },
 ];
 
-export const getProtectedRoutes = () => routes.filter(route => route.requiresAuth);
-export const getSidebarRoutes = () => routes.filter(route => route.showInSidebar);
-export const getRouteByPath = (path: string) => routes.find(route => route.path === path);
+const processedRoutes = processRoutes(routes);
+
+export const getProtectedRoutes = () => processedRoutes.filter(route => route.requiresAuth);
+export const getSidebarRoutes = () => processedRoutes.filter(route => route.showInSidebar);
+export const getRouteByPath = (path: string) => {
+    const allRoutes = getAllRoutes();
+    return allRoutes.find(route => route.path === path);
+};
 
 export const getAllRoutes = (): RouteConfig[] => {
     const flatRoutes: RouteConfig[] = [];
 
     const addRoute = (route: RouteConfig) => {
-        flatRoutes.push(route);
+        if (route.component) {
+            flatRoutes.push(route);
+        }
         if (route.children) {
             route.children.forEach(addRoute);
         }
     };
 
-    routes.forEach(addRoute);
+    processedRoutes.forEach(addRoute);
     return flatRoutes;
 };
