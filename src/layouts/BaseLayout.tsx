@@ -208,7 +208,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
                     </header>
 
                     {/* Main content area */}
-                    <main className="flex-1 overflow-auto">
+                    <main className="flex-1 overflow-auto px-6">
                         {children}
                     </main>
                 </SidebarInset>

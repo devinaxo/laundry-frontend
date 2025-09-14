@@ -1,3 +1,4 @@
+import UsersList from '@/pages/users/UsersList';
 import type { LucideIcon } from 'lucide-react';
 import { ClipboardList, Home, Key, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
 import { lazy } from 'react';
@@ -12,8 +13,6 @@ const InventoryPage = lazy(() => import('@/pages/mock/InventoryPage'));
 const CreateInventoryPage = lazy(() => import('@/pages/mock/CreateInventoryPage'));
 const ServicesPage = lazy(() => import('@/pages/mock/ServicesPage'));
 const CreateServicePage = lazy(() => import('@/pages/mock/CreateServicePage'));
-const SettingsPage = lazy(() => import('@/pages/mock/SettingsPage'));
-const UserManagementPage = lazy(() => import('@/pages/mock/UserManagementPage'));
 
 // Actual perms
 export const Permission = {
@@ -112,7 +111,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: SettingsPage,
+                component: UsersList,
                 title: 'Lista de usuarios',
                 icon: Users,
                 showInSidebar: true,
@@ -121,7 +120,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: UserManagementPage,
+                component: UsersList,
                 title: 'Crear usuario',
                 icon: UserPlus,
                 showInSidebar: true,
