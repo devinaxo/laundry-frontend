@@ -180,12 +180,12 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
                                 ) : (
                                     <Button
                                         variant="ghost"
-                                        size="sm"
+                                        size="icon"
                                         onClick={handleLogout}
                                         className="text-muted-foreground hover:text-destructive group-data-[collapsible=icon]:p-2"
                                         title="Logout"
                                     >
-                                        <LogOut className="h-4 w-4" />
+                                        <LogOut className="h-[1.2rem] w-[1.2rem]" />
                                     </Button>
                                 )}
                             </div>
