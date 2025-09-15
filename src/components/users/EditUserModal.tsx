@@ -319,8 +319,8 @@ export default function EditUserModal({
                         </Button>
                         <Button
                             type="submit"
+                            variant="submit"
                             disabled={isLoading}
-                            className="bg-primary text-primary-foreground hover:bg-primary/50"
                         >
                             {isLoading ? (
                                 <div className="flex items-center gap-2">

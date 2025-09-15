@@ -1,5 +1,5 @@
 import instance from '../lib/axios';
-import type { LoginRequest, LoginResponse, LogoutResponse, UserWithPermissions } from '../types/api';
+import type { LoginRequest, LoginResponse, LogoutResponse, UserWithPermissions, CreateUserRequest } from '../types/api';
 
 /**
  * Auth related API POSTs
@@ -32,5 +32,10 @@ export const restoreUser = (userId: number): Promise<{ message: string }> => {
 
 export const updateUser = (userId: number, userData: Partial<UserWithPermissions>): Promise<UserWithPermissions> => {
     return instance.put(`/users/${userId}`, userData)
+        .then((response) => response.data);
+};
+
+export const createUser = (userData: CreateUserRequest): Promise<UserWithPermissions> => {
+    return instance.post('/users', userData)
         .then((response) => response.data);
 };

@@ -1,3 +1,4 @@
+import NewUser from '@/pages/users/NewUser';
 import UsersList from '@/pages/users/UsersList';
 import type { LucideIcon } from 'lucide-react';
 import { ClipboardList, Home, Key, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
@@ -120,7 +121,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: UsersList,
+                component: NewUser,
                 title: 'Crear usuario',
                 icon: UserPlus,
                 showInSidebar: true,

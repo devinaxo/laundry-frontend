@@ -1,7 +1,6 @@
-import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '@/contexts/AuthContext';
-import { getCurrentUser } from '@/api/getFetches';
-import type { UserWithPermissions, Permission } from '@/types/api';
+import type { Permission } from '@/types/api';
+import { useContext } from 'react';
 
 /**
  * Simple hook to check if the current user has a specific permission

@@ -40,6 +40,15 @@ export interface LoginRequest {
     password: string;
 }
 
+export interface CreateUserRequest {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+    role_id: number;
+    active?: boolean;
+}
+
 // Response interfaces
 export interface LoginResponse {
     message: string;

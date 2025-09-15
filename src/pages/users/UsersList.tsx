@@ -420,8 +420,8 @@ export default function UsersList() {
                                 <TableCell colSpan={columns.length} className="h-48">
                                     <div className="flex items-center justify-center">
                                         <div className="flex items-center gap-2">
-                                            <Spinner variant="circle" className="h-6 w-6 text-primary" />
                                             <span className="text-muted-foreground">Cargando usuarios...</span>
+                                            <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
                                         </div>
                                     </div>
                                 </TableCell>
