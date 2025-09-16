@@ -1,20 +1,19 @@
-import RolesList from '@/pages/roles/RolesList';
-import NewUser from '@/pages/users/NewUser';
-import UsersList from '@/pages/users/UsersList';
 import type { LucideIcon } from 'lucide-react';
-import { ClipboardList, Home, Key, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
+import { ClipboardList, Home, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
 import { lazy } from 'react';
 
 // Lazy load components
 const DashboardContent = lazy(() => import('@/pages/dashboard/DashboardContent'));
+const UsersPage = lazy(() => import('@/pages/users/UsersList'));
+const CreateUserPage = lazy(() => import('@/pages/users/NewUser'));
+const RolesPage = lazy(() => import('@/pages/roles/RolesList'));
+
 const OrdersPage = lazy(() => import('@/pages/mock/OrdersPage'));
 const CreateOrderPage = lazy(() => import('@/pages/mock/CreateOrderPage'));
 const CustomersPage = lazy(() => import('@/pages/mock/CustomersPage'));
 const CreateCustomerPage = lazy(() => import('@/pages/mock/CreateCustomerPage'));
 const InventoryPage = lazy(() => import('@/pages/mock/InventoryPage'));
 const CreateInventoryPage = lazy(() => import('@/pages/mock/CreateInventoryPage'));
-const ServicesPage = lazy(() => import('@/pages/mock/ServicesPage'));
-const CreateServicePage = lazy(() => import('@/pages/mock/CreateServicePage'));
 
 // Actual perms
 export const Permission = {
@@ -108,7 +107,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: UsersList,
+                component: UsersPage,
                 title: 'Lista de usuarios',
                 icon: Users,
                 showInSidebar: true,
@@ -117,7 +116,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: NewUser,
+                component: CreateUserPage,
                 title: 'Crear usuario',
                 icon: UserPlus,
                 showInSidebar: true,
@@ -128,7 +127,7 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/roles/list',
-        component: RolesList,
+        component: RolesPage,
         title: 'Roles',
         icon: UserCog,
         showInSidebar: true,
