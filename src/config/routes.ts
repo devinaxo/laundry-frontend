@@ -1,3 +1,4 @@
+import RolesList from '@/pages/roles/RolesList';
 import NewUser from '@/pages/users/NewUser';
 import UsersList from '@/pages/users/UsersList';
 import type { LucideIcon } from 'lucide-react';
@@ -24,13 +25,8 @@ export const Permission = {
     EDIT_USERS: 'editUsers',
     DELETE_USERS: 'deleteUsers',
 
-    CREATE_ROLES: 'createRoles',
     VIEW_ROLES: 'viewRoles',
     EDIT_ROLES: 'editRoles',
-
-    CREATE_PERMISSIONS: 'createPermissions',
-    VIEW_PERMISSIONS: 'viewPermissions',
-    EDIT_PERMISSIONS: 'editPermissions',
 
     CREATE_CLIENTS: 'createClients',
     VIEW_CLIENTS: 'viewClients',
@@ -65,7 +61,7 @@ const buildFullPath = (parentPath: string, childPath: string): string => {
 const processRoutes = (routes: RouteConfig[], parentPath = ''): RouteConfig[] => {
     return routes.map(route => {
         const fullPath = parentPath ? buildFullPath(parentPath, route.path) : route.path;
-        
+
         const processedRoute: RouteConfig = {
             ...route,
             path: fullPath,
@@ -131,62 +127,13 @@ export const routes: RouteConfig[] = [
         ],
     },
     {
-        path: '/roles',
+        path: '/roles/list',
+        component: RolesList,
         title: 'Roles',
         icon: UserCog,
         showInSidebar: true,
         requiresAuth: true,
         permissions: [Permission.VIEW_ROLES],
-        isParent: true,
-        children: [
-            {
-                path: '/list',
-                component: ServicesPage,
-                title: 'Ver roles',
-                icon: UserCog,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.VIEW_ROLES],
-            },
-            {
-                path: '/create',
-                component: CreateServicePage,
-                title: 'Crear rol',
-                icon: Plus,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.CREATE_ROLES],
-            },
-        ],
-    },
-    {
-        path: '/permissions',
-        title: 'Permisos',
-        icon: Key,
-        showInSidebar: true,
-        requiresAuth: true,
-        permissions: [Permission.VIEW_PERMISSIONS],
-        isParent: true,
-        children: [
-            {
-                path: '/list',
-                component: ServicesPage,
-                title: 'Ver permisos',
-                icon: Key,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.VIEW_PERMISSIONS],
-            },
-            {
-                path: '/create',
-                component: CreateServicePage,
-                title: 'Crear permiso',
-                icon: Plus,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.CREATE_PERMISSIONS],
-            },
-        ],
     },
     {
         path: '/orders',

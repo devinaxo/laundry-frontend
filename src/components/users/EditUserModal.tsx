@@ -19,7 +19,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
-import { updateUser } from '@/api/postFetches';
+import { updateUser } from '@/api/patchFetches';
 import { getRolesList } from '@/api/getFetches';
 import type { UserWithPermissions, Role } from '@/types/api';
 
