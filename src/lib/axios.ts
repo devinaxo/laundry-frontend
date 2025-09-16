@@ -1,5 +1,13 @@
 import axios from 'axios';
 
+// Global variable to store session expired callback
+let showSessionExpiredModal: (() => void) | null = null;
+
+// Function to set the session expired callback
+export const setSessionExpiredCallback = (callback: () => void) => {
+    showSessionExpiredModal = callback;
+};
+
 // Create Axios instance with base configuration
 export const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -44,9 +52,21 @@ api.interceptors.response.use(
             if (error.config?.url?.includes('/logout')) {
                 return Promise.reject(error);
             }
+            
+            // Clear authentication data
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
             removeAuthToken();
+            
+            // Show session expired modal if callback is available
+            if (showSessionExpiredModal) {
+                showSessionExpiredModal();
+            } else {
+                // Fallback to direct redirect if modal is not available
+                window.location.href = '/login';
+            }
+            
+            return Promise.reject(error);
         }
         return Promise.reject(error);
     }

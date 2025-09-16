@@ -1,54 +1,71 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
+import { SessionExpiredProvider, useSessionExpired } from './contexts/SessionExpiredContext';
+import { SessionExpiredModal } from './components/SessionExpiredModal';
+import { setSessionExpiredCallback } from './lib/axios';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import { getAllRoutes } from './config/routes';
 import Login from './pages/auth/Login';
+import { Spinner } from './components/ui/shadcn-io/spinner';
 
-// Loading component for suspense
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-  </div>
+    <div className="flex items-center justify-center min-h-[80vh]">
+        <Spinner className='w-[40vw] h-[40vh] text-foreground' variant='infinite' />
+    </div>
 );
 
+const AppContent = () => {
+    const { showSessionExpiredModal } = useSessionExpired();
+    const allRoutes = getAllRoutes();
+
+    useEffect(() => {
+        setSessionExpiredCallback(showSessionExpiredModal);
+    }, [showSessionExpiredModal]);
+
+    return (
+        <>
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                {allRoutes
+                    .filter(route => route.requiresAuth)
+                    .map(route => {
+                        const Component = route.component;
+                        if (!Component) return null;
+
+                        return (
+                            <Route
+                                key={route.path}
+                                path={route.path}
+                                element={
+                                    <ProtectedLayout>
+                                        <Component />
+                                    </ProtectedLayout>
+                                }
+                            />
+                        );
+                    })
+                }
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+            <SessionExpiredModal />
+        </>
+    );
+};
+
 function App() {
-  const allRoutes = getAllRoutes();
-  
-  return (
-    <AuthProvider>
-      <Router>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-
-            {/* Protected routes with layout - generated from routes config */}
-            {allRoutes
-              .filter(route => route.requiresAuth)
-              .map(route => (
-                <Route
-                  key={route.path}
-                  path={route.path}
-                  element={
-                    <ProtectedLayout>
-                      <route.component />
-                    </ProtectedLayout>
-                  }
-                />
-              ))
-            }
-
-            {/* Redirect root to dashboard */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-            {/* Catch-all route - redirect to dashboard */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </Suspense>
-      </Router>
-    </AuthProvider>
-  );
+    return (
+        <AuthProvider>
+            <SessionExpiredProvider>
+                <Router>
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <AppContent />
+                    </Suspense>
+                </Router>
+            </SessionExpiredProvider>
+        </AuthProvider>
+    );
 }
 
 export default App;

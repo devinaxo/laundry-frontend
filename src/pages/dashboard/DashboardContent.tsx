@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
                         <CardDescription>+12% from yesterday</CardDescription>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg">Pending Items</CardTitle>
@@ -42,7 +42,7 @@ const Dashboard: React.FC = () => {
                         <CardDescription>Items in progress</CardDescription>
                     </CardContent>
                 </Card>
-                
+
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg">Revenue Today</CardTitle>
