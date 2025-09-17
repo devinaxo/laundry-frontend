@@ -62,6 +62,16 @@ export interface CreateUserRequest {
     active?: boolean;
 }
 
+export interface CreateClientRequest {
+    forename: string;
+    surname: string;
+    phone: string;
+    address: string;
+    latitude: string;
+    longitude: string;
+    active?: boolean;
+}
+
 // Response interfaces
 export interface LoginResponse {
     message: string;

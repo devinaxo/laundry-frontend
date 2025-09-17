@@ -1,5 +1,5 @@
 import instance from '../lib/axios';
-import type { LoginRequest, LoginResponse, LogoutResponse, UserWithPermissions, CreateUserRequest } from '../types/api';
+import type { LoginRequest, LoginResponse, LogoutResponse, UserWithPermissions, CreateUserRequest, Client, CreateClientRequest } from '../types/api';
 
 /**
  * Auth related POST API calls
@@ -22,5 +22,14 @@ export const postLogout = (): Promise<LogoutResponse> => {
 
 export const createUser = (userData: CreateUserRequest): Promise<UserWithPermissions> => {
     return instance.post('/users', userData)
+        .then((response) => response.data);
+};
+
+/**
+ * Client related POST API calls
+ */
+
+export const createClient = (clientData: CreateClientRequest): Promise<Client> => {
+    return instance.post('/clients', clientData)
         .then((response) => response.data);
 };

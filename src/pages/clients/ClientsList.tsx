@@ -31,9 +31,11 @@ import {
     type ColumnFiltersState,
     type SortingState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronLeft, ChevronRight, Edit, MoreVertical, Search, UserCheck, UserX } from 'lucide-react';
+import { ArrowUpDown, ChevronLeft, ChevronRight, Edit, MapPin, MoreVertical, Search, UserCheck, UserX } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import ClientMapModal from '@/components/clients/ClientMapModal';
+import EditClientModal from '@/components/clients/EditClientModal';
 
 const columnHelper = createColumnHelper<Client>();
 
@@ -126,6 +128,11 @@ export default function ClientsList() {
     const [activeFilter] = useState<boolean | undefined>(undefined);
 
     const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    // Modal states
+    const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -225,7 +232,7 @@ export default function ClientsList() {
                     <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isActive
                             ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                             }`}
                     >
                         {isActive ? 'Activo' : 'Inactivo'}
@@ -282,6 +289,23 @@ export default function ClientsList() {
             ),
             size: 160,
         }),
+        columnHelper.display({
+            id: 'map',
+            header: () => (
+                <span className="font-medium text-muted-foreground">Mapa</span>
+            ),
+            cell: ({ row }) => (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleShowMap(row.original)}
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-950"
+                >
+                    <MapPin className="h-4 w-4" />
+                </Button>
+            ),
+            size: 60,
+        }),
         canEdit ?
             (
                 columnHelper.display({
@@ -307,9 +331,35 @@ export default function ClientsList() {
     ];
 
     const handleEditClient = (client: Client) => {
-        // TODO: Implement edit client functionality
-        console.log('Edit client:', client);
-        toast.info('Funcionalidad de editar cliente pendiente de implementar');
+        setSelectedClient(client);
+        setIsEditModalOpen(true);
+    };
+
+    const handleShowMap = (client: Client) => {
+        setSelectedClient(client);
+        setIsMapModalOpen(true);
+    };
+
+    const handleCloseMapModal = () => {
+        setIsMapModalOpen(false);
+        setSelectedClient(null);
+    };
+
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+        setSelectedClient(null);
+    };
+
+    const handleClientUpdated = (updatedClient: Client) => {
+        if (paginationData) {
+            const updatedData = {
+                ...paginationData,
+                data: paginationData.data.map(client =>
+                    client.id === updatedClient.id ? updatedClient : client
+                )
+            };
+            setPaginationData(updatedData);
+        }
     };
 
     const refreshClients = async () => {
@@ -368,6 +418,7 @@ export default function ClientsList() {
     useEffect(() => {
         fetchClients();
     }, [fetchClients]);
+    console.log(clients)
 
     if (error) {
         return (
@@ -524,6 +575,19 @@ export default function ClientsList() {
                     </Button>
                 </div>
             )}
+
+            <ClientMapModal
+                client={selectedClient}
+                isOpen={isMapModalOpen}
+                onClose={handleCloseMapModal}
+            />
+
+            <EditClientModal
+                client={selectedClient}
+                isOpen={isEditModalOpen}
+                onClose={handleCloseEditModal}
+                onClientUpdated={handleClientUpdated}
+            />
         </div>
     );
 }

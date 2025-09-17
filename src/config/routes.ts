@@ -8,11 +8,11 @@ const UsersPage = lazy(() => import('@/pages/users/UsersList'));
 const CreateUserPage = lazy(() => import('@/pages/users/NewUser'));
 const RolesPage = lazy(() => import('@/pages/roles/RolesList'));
 const ClientsPage = lazy(() => import('@/pages/clients/ClientsList'));
+const CreateClientPage = lazy(() => import('@/pages/clients/NewClient'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 const OrdersPage = lazy(() => import('@/pages/mock/OrdersPage'));
 const CreateOrderPage = lazy(() => import('@/pages/mock/CreateOrderPage'));
-const CreateCustomerPage = lazy(() => import('@/pages/mock/CreateCustomerPage'));
 const InventoryPage = lazy(() => import('@/pages/mock/InventoryPage'));
 const CreateInventoryPage = lazy(() => import('@/pages/mock/CreateInventoryPage'));
 
@@ -155,7 +155,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: CreateCustomerPage,
+                component: CreateClientPage,
                 title: 'Agregar cliente',
                 icon: BookPlus,
                 showInSidebar: true,
