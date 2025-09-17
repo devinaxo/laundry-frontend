@@ -46,8 +46,22 @@ const AppContent = () => {
                         );
                     })
                 }
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                {allRoutes
+                    .filter(route => !route.requiresAuth)
+                    .map(route => {
+                        const Component = route.component;
+                        if (!Component) return null;
+
+                        return (
+                            <Route
+                                key={route.path}
+                                path={route.path}
+                                element={<Component />}
+                            />
+                        );
+                    })
+                }
+                <Route path="*" element={<Navigate to="/404" replace />} />
             </Routes>
             <SessionExpiredModal />
         </>

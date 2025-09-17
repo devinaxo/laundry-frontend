@@ -29,12 +29,14 @@ export const SessionExpiredModal: React.FC = () => {
         <Dialog open={isSessionExpired} onOpenChange={() => { }}>
             <DialogContent className="sm:max-w-md [&>button]:hidden">
                 <DialogHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/20">
-                            <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                        </div>
+                    <div className="flex items-center">
                         <div>
-                            <DialogTitle>Sesión Expirada</DialogTitle>
+                            <DialogTitle className="flex items-center justify-between space-x-3">
+                                Sesión Expirada
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/20">
+                                    <AlertTriangle className="h-10 w-10 text-orange-600 dark:text-orange-400" />
+                                </div>
+                            </DialogTitle>
                             <DialogDescription className="mt-1">
                                 Tu sesión ha expirado por motivos de seguridad. Por favor, inicia sesión nuevamente para continuar.
                             </DialogDescription>
@@ -44,7 +46,7 @@ export const SessionExpiredModal: React.FC = () => {
 
                 <DialogFooter className="mt-6">
                     <Button onClick={handleRedirectToLogin} className="w-full">
-                        Ir al Login
+                        Redireccioname
                     </Button>
                 </DialogFooter>
             </DialogContent>

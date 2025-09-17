@@ -1,5 +1,6 @@
+import ClientsList from '@/pages/clients/ClientsList';
 import type { LucideIcon } from 'lucide-react';
-import { ClipboardList, Home, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
+import { BookPlus, BookUser, ClipboardList, Home, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
 import { lazy } from 'react';
 
 // Lazy load components
@@ -7,6 +8,7 @@ const DashboardContent = lazy(() => import('@/pages/dashboard/DashboardContent')
 const UsersPage = lazy(() => import('@/pages/users/UsersList'));
 const CreateUserPage = lazy(() => import('@/pages/users/NewUser'));
 const RolesPage = lazy(() => import('@/pages/roles/RolesList'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
 
 const OrdersPage = lazy(() => import('@/pages/mock/OrdersPage'));
 const CreateOrderPage = lazy(() => import('@/pages/mock/CreateOrderPage'));
@@ -88,7 +90,7 @@ export interface RouteConfig {
 
 export const routes: RouteConfig[] = [
     {
-        path: '/dashboard',
+        path: '/',
         component: DashboardContent,
         title: 'Dashboard',
         icon: Home,
@@ -135,6 +137,35 @@ export const routes: RouteConfig[] = [
         permissions: [Permission.VIEW_ROLES],
     },
     {
+        path: '/clients',
+        title: 'Clientes',
+        icon: BookUser,
+        showInSidebar: true,
+        requiresAuth: true,
+        permissions: [Permission.VIEW_CLIENTS],
+        isParent: true,
+        children: [
+            {
+                path: '/list',
+                component: ClientsList,
+                title: 'Ver clientes',
+                icon: BookUser,
+                showInSidebar: true,
+                requiresAuth: true,
+                permissions: [Permission.VIEW_CLIENTS],
+            },
+            {
+                path: '/new',
+                component: CreateCustomerPage,
+                title: 'Agregar cliente',
+                icon: BookPlus,
+                showInSidebar: true,
+                requiresAuth: true,
+                permissions: [Permission.CREATE_CLIENTS],
+            },
+        ],
+    },
+    {
         path: '/orders',
         title: 'Órdenes',
         icon: ClipboardList,
@@ -160,35 +191,6 @@ export const routes: RouteConfig[] = [
                 showInSidebar: true,
                 requiresAuth: true,
                 permissions: [Permission.CREATE_ORDERS],
-            },
-        ],
-    },
-    {
-        path: '/clients',
-        title: 'Clientes',
-        icon: Users,
-        showInSidebar: true,
-        requiresAuth: true,
-        permissions: [Permission.VIEW_CLIENTS],
-        isParent: true,
-        children: [
-            {
-                path: '/list',
-                component: CustomersPage,
-                title: 'Ver clientes',
-                icon: Users,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.VIEW_CLIENTS],
-            },
-            {
-                path: '/new',
-                component: CreateCustomerPage,
-                title: 'Agregar cliente',
-                icon: UserPlus,
-                showInSidebar: true,
-                requiresAuth: true,
-                permissions: [Permission.CREATE_CLIENTS],
             },
         ],
     },
@@ -249,6 +251,15 @@ export const routes: RouteConfig[] = [
                 permissions: [Permission.CREATE_SUBCATEGORIES],
             },
         ],
+    },
+    {
+        path: '/404',
+        component: NotFound,
+        title: 'Página no encontrada',
+        icon: Home,
+        showInSidebar: false,
+        requiresAuth: false,
+        permissions: [],
     },
 ];
 
