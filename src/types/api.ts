@@ -47,6 +47,27 @@ export interface Client {
     updated_at: string,
 }
 
+export interface Category {
+    id: number,
+    name: string,
+    active: boolean,
+    description: string,
+    created_at: string,
+    updated_at: string,
+}
+
+export interface Subcategory {
+    id: number;
+    category_id: number;
+    name: string;
+    description: string;
+    price: string;
+    active: boolean;
+    created_at: string;
+    updated_at: string;
+    category: Category;
+}
+
 // Request interfaces
 export interface LoginRequest {
     username: string;
@@ -71,6 +92,45 @@ export interface CreateClientRequest {
     longitude: string;
     active?: boolean;
 }
+
+export interface CreateCategoryRequest {
+    name: string;
+    description?: string;
+    active?: boolean;
+}
+
+export interface UpdateCategoryRequest {
+    name?: string;
+    description?: string;
+    active?: boolean;
+}
+
+export interface CreateSubcategoryRequest {
+    category_id: number;
+    name: string;
+    description?: string;
+    price: number;
+    active?: boolean;
+}
+
+export interface UpdateSubcategoryRequest {
+    category_id?: number;
+    name?: string;
+    description?: string;
+    price?: number;
+    active?: boolean;
+}
+
+export interface UpdateClientRequest {
+    forename?: string;
+    surname?: string;
+    phone?: string;
+    address?: string;
+    latitude?: string;
+    longitude?: string;
+    active?: boolean;
+}
+
 
 // Response interfaces
 export interface LoginResponse {

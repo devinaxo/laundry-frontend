@@ -1,5 +1,5 @@
 import instance from '../lib/axios';
-import type { UserWithPermissions, Role, Permission, PaginatedClientsResponse, PaginatedClientRequest } from '../types/api';
+import type { UserWithPermissions, Role, Permission, PaginatedClientsResponse, PaginatedClientRequest, Category, Subcategory } from '../types/api';
 
 /**
  * Auth related GET API calls
@@ -40,4 +40,19 @@ export const getPermissionsList = (): Promise<Permission[]> => {
 export const getClientsPaginated = (params: PaginatedClientRequest): Promise<PaginatedClientsResponse> => {
     return instance.get('/clients/paginated', { params })
         .then((response) => response.data);
+}
+
+/**
+ * Categories and Subcategories related GET API calls
+ */
+
+export const getCategoriesList = (): Promise<Category[]> => {
+    return instance.get('/categories')
+        .then((response) => response.data.data);
+}
+
+export const getSubcategoriesList = (categoryId?: number): Promise<Subcategory[]> => {
+    const params = categoryId ? { category_id: categoryId } : {};
+    return instance.get('/subcategories', { params })
+        .then((response) => response.data.data);
 }

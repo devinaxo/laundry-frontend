@@ -7,8 +7,7 @@ import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import LocationPicker from '@/components/ui/LocationPicker';
 import { toast } from 'sonner';
 import { updateClient } from '@/api/putFetches';
-import type { Client } from '@/types/api';
-import type { UpdateClientRequest } from '@/api/putFetches';
+import type { Client, UpdateClientRequest } from '@/types/api';
 
 interface EditClientModalProps {
     client: Client | null;

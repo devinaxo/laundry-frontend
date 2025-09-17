@@ -1,5 +1,5 @@
 import instance from '../lib/axios';
-import type { LoginRequest, LoginResponse, LogoutResponse, UserWithPermissions, CreateUserRequest, Client, CreateClientRequest } from '../types/api';
+import type { LoginRequest, LoginResponse, LogoutResponse, UserWithPermissions, CreateUserRequest, Client, CreateClientRequest, Category, CreateCategoryRequest, Subcategory, CreateSubcategoryRequest } from '../types/api';
 
 /**
  * Auth related POST API calls
@@ -31,5 +31,23 @@ export const createUser = (userData: CreateUserRequest): Promise<UserWithPermiss
 
 export const createClient = (clientData: CreateClientRequest): Promise<Client> => {
     return instance.post('/clients', clientData)
+        .then((response) => response.data);
+};
+
+/**
+ * Category related POST API calls
+ */
+
+export const createCategory = (categoryData: CreateCategoryRequest): Promise<Category> => {
+    return instance.post('/categories', categoryData)
+        .then((response) => response.data);
+};
+
+/**
+ * Subcategory related POST API calls
+ */
+
+export const createSubcategory = (subcategoryData: CreateSubcategoryRequest): Promise<Subcategory> => {
+    return instance.post('/subcategories', subcategoryData)
         .then((response) => response.data);
 };

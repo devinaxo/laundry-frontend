@@ -9,6 +9,10 @@ const CreateUserPage = lazy(() => import('@/pages/users/NewUser'));
 const RolesPage = lazy(() => import('@/pages/roles/RolesList'));
 const ClientsPage = lazy(() => import('@/pages/clients/ClientsList'));
 const CreateClientPage = lazy(() => import('@/pages/clients/NewClient'));
+const CategoriesPage = lazy(() => import('@/pages/categories/CategoriesList'));
+const CreateCategoriesPage = lazy(() => import('@/pages/categories/NewCategory'));
+const SubcategoriesPage = lazy(() => import('@/pages/subcategories/SubcategoriesList'));
+const CreateSubcategoriesPage = lazy(() => import('@/pages/subcategories/NewSubcategory'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 const OrdersPage = lazy(() => import('@/pages/mock/OrdersPage'));
@@ -204,7 +208,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: InventoryPage,
+                component: CategoriesPage,
                 title: 'Ver categorías',
                 icon: Package,
                 showInSidebar: true,
@@ -213,7 +217,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: CreateInventoryPage,
+                component: CreateCategoriesPage,
                 title: 'Agregar categoría',
                 icon: PackagePlus,
                 showInSidebar: true,
@@ -233,7 +237,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: InventoryPage,
+                component: SubcategoriesPage,
                 title: 'Ver subcategorías',
                 icon: Package,
                 showInSidebar: true,
@@ -242,7 +246,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: CreateInventoryPage,
+                component: CreateSubcategoriesPage,
                 title: 'Agregar subcategoría',
                 icon: PackagePlus,
                 showInSidebar: true,

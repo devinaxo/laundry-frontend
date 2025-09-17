@@ -1,5 +1,4 @@
-import { getRolesList } from '@/api/getFetches';
-import EditRoleModal from '@/components/roles/EditRoleModal';
+import { getCategoriesList } from '@/api/getFetches';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -19,7 +18,7 @@ import {
 } from '@/components/ui/table';
 import { Permission } from '@/config/routes';
 import { useHasPermission } from '@/hooks/useHasPermission';
-import type { Role } from '@/types/api';
+import type { Category } from '@/types/api';
 import {
     createColumnHelper,
     flexRender,
@@ -32,15 +31,16 @@ import {
 } from '@tanstack/react-table';
 import { ArrowUpDown, Edit, MoreVertical, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import EditCategoryModal from '@/components/categories/EditCategoryModal';
 
-const columnHelper = createColumnHelper<Role>();
+const columnHelper = createColumnHelper<Category>();
 
 interface UserActionsProps {
-    role: Role;
-    onEditRole: (role: Role) => void;
+    category: Category;
+    onEditCategory: (category: Category) => void;
 }
 
-function UserActions({ role, onEditRole }: UserActionsProps) {
+function UserActions({ category, onEditCategory }: UserActionsProps) {
 
     return (
         <DropdownMenu>
@@ -55,29 +55,29 @@ function UserActions({ role, onEditRole }: UserActionsProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover border-border">
                 <DropdownMenuItem
-                    onClick={() => onEditRole(role)}
+                    onClick={() => onEditCategory(category)}
                     className="cursor-pointer hover:bg-accent focus:bg-accent"
                 >
                     <Edit className="mr-2 h-4 w-4" />
-                    <span>Editar rol</span>
+                    <span>Editar categoría</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
 }
 
-export default function RolesList() {
-    const [roles, setRoles] = useState<Role[]>([]);
+export default function CategoriesList() {
+    const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [globalFilter, setGlobalFilter] = useState('');
 
-    const [editingRole, setEditingRole] = useState<Role | null>(null);
+    const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const canEdit = useHasPermission(Permission.EDIT_ROLES);
+    const canEdit = useHasPermission(Permission.EDIT_CATEGORIES);
 
     const columns = [
         columnHelper.accessor('id', {
@@ -105,7 +105,7 @@ export default function RolesList() {
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
                 >
-                    Nombre Interno
+                    Nombre
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -115,22 +115,48 @@ export default function RolesList() {
                 </span>
             ),
         }),
-        columnHelper.accessor('displayName', {
+        columnHelper.accessor('description', {
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
                 >
-                    Nombre de Muestra
+                    Descripción
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
             cell: (info) => (
-                <span className="text-sm text-foreground">
+                <span className="font-medium text-muted-foreground">
                     {info.getValue()}
                 </span>
             ),
+        }),
+        columnHelper.accessor('active', {
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
+                >
+                    Estado
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            ),
+            cell: (info) => {
+                const isActive = info.getValue();
+                return (
+                    <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isActive
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                            }`}
+                    >
+                        {isActive ? 'Activo' : 'Inactivo'}
+                    </span>
+                );
+            },
+            size: 100,
         }),
         columnHelper.accessor('created_at', {
             header: ({ column }) => (
@@ -187,8 +213,8 @@ export default function RolesList() {
                     header: '',
                     cell: ({ row }) => (
                         <UserActions
-                            role={row.original}
-                            onEditRole={handleEditRole}
+                            category={row.original}
+                            onEditCategory={handleEditCategory}
                         />
                     ),
                     size: 80,
@@ -203,26 +229,26 @@ export default function RolesList() {
             ),
     ];
 
-    const handleEditRole = (role: Role) => {
-        setEditingRole(role);
+    const handleEditCategory = (category: Category) => {
+        setEditingCategory(category);
         setIsEditModalOpen(true);
     };
 
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
-        setEditingRole(null);
+        setEditingCategory(null);
     };
 
-    const handleRoleUpdated = (updatedRole: Role) => {
-        setRoles(prevRoles =>
-            prevRoles.map(role =>
-                role.id === updatedRole.id ? updatedRole : role
+    const handleCategoryUpdated = (updatedCategory: Category) => {
+        setCategories(prevCategories =>
+            prevCategories.map(category =>
+                category.id === updatedCategory.id ? updatedCategory : category
             )
         );
     };
 
     const table = useReactTable({
-        data: roles,
+        data: categories,
         columns: columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -236,32 +262,33 @@ export default function RolesList() {
             globalFilter,
         },
     });
-    const fetchRoles = async () => {
+    const fetchCategories = async () => {
         try {
             setIsLoading(true);
             setError(null);
-            const rolesData = await getRolesList();
-            setRoles(rolesData);
+            const categoriesData = await getCategoriesList();
+            console.log('Fetched categories:', categoriesData);
+            setCategories(categoriesData);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al cargar roles');
-            console.error('Error fetching roles:', err);
+            setError(err instanceof Error ? err.message : 'Error al cargar categorías');
+            console.error('Error fetching categories:', err);
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchRoles();
+        fetchCategories();
     }, []);
 
     if (error) {
         return (
             <div className="flex items-center justify-center p-8">
                 <div className="text-center">
-                    <p className="text-destructive font-medium">Error al cargar roles</p>
+                    <p className="text-destructive font-medium">Error al cargar categorías</p>
                     <p className="text-sm text-muted-foreground mt-1">{error}</p>
                     <Button
-                        onClick={() => fetchRoles()}
+                        onClick={() => fetchCategories()}
                         variant="outline"
                         size="sm"
                         className="mt-4 text-foreground"
@@ -277,16 +304,16 @@ export default function RolesList() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Lista de Roles</h1>
+                    <h1 className="text-2xl font-bold text-foreground">Lista de Categorías</h1>
                     <p className="text-muted-foreground">
-                        Gestiona los roles del sistema
+                        Gestiona las categorías del sistema
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Buscar roles..."
+                            placeholder="Buscar categorías..."
                             value={globalFilter ?? ''}
                             onChange={(event) => setGlobalFilter(String(event.target.value))}
                             className="pl-9 w-64"
@@ -319,7 +346,7 @@ export default function RolesList() {
                                 <TableCell colSpan={columns.length} className="h-48">
                                     <div className="flex items-center justify-center">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">Cargando roles...</span>
+                                            <span className="text-muted-foreground">Cargando categorías...</span>
                                             <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
                                         </div>
                                     </div>
@@ -343,9 +370,9 @@ export default function RolesList() {
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex flex-col items-center gap-2">
-                                        <p className="text-muted-foreground">No se encontraron roles</p>
+                                        <p className="text-muted-foreground">No se encontraron categorías</p>
                                         <p className="text-sm text-muted-foreground">
-                                            {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay roles registrados'}
+                                            {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay categorías registradas'}
                                         </p>
                                     </div>
                                 </TableCell>
@@ -355,22 +382,22 @@ export default function RolesList() {
                 </Table>
             </div>
 
-            {!isLoading && roles.length > 0 && (
+            {!isLoading && categories.length > 0 && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div>
-                        Mostrando {table.getFilteredRowModel().rows.length} de {roles.length} rol(es)
+                        Mostrando {table.getFilteredRowModel().rows.length} de {categories.length} categoría(s)
                     </div>
                     <div className="flex items-center gap-2">
-                        <span>Total: {roles.length} rol(es)</span>
+                        <span>Total: {categories.length} categoría(s)</span>
                     </div>
                 </div>
             )}
 
-            <EditRoleModal
-                role={editingRole}
+            <EditCategoryModal
+                category={editingCategory}
                 isOpen={isEditModalOpen}
                 onClose={handleCloseEditModal}
-                onRoleUpdated={handleRoleUpdated}
+                onCategoryUpdated={handleCategoryUpdated}
             />
         </div>
     );

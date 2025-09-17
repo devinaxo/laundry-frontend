@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -92,6 +92,9 @@ const NewClient: React.FC = () => {
             <Card className="max-w-2xl mx-auto">
                 <CardHeader>
                     <CardTitle>Crear Nuevo Cliente</CardTitle>
+                    <CardDescription>
+                        Complete la información a continuación para crear un nuevo cliente. Los campos marcados con <span className="text-red-500">*</span> son obligatorios.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
