@@ -1,18 +1,15 @@
-import { useEffect, useState } from 'react';
+import { deleteClient } from '@/api/deleteFetches';
+import { getClientsPaginated } from '@/api/getFetches';
+import { restoreClient } from '@/api/patchFetches';
+import { Button } from '@/components/ui/button';
 import {
-    createColumnHelper,
-    flexRender,
-    getCoreRowModel,
-    useReactTable,
-    getSortedRowModel,
-    getFilteredRowModel,
-    type SortingState,
-    type ColumnFiltersState,
-} from '@tanstack/react-table';
-import { getUsersList } from '@/api/getFetches';
-import { deleteUser } from '@/api/deleteFetches';
-import { restoreUser } from '@/api/patchFetches';
-import type { UserWithPermissions } from '@/types/api';
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import {
     Table,
     TableBody,
@@ -21,46 +18,48 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import { Spinner } from '@/components/ui/shadcn-io/spinner';
-import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ArrowUpDown, Search, Edit, UserX, UserCheck, MoreVertical } from 'lucide-react';
-import EditUserModal from '@/components/users/EditUserModal';
-import { toast } from 'sonner';
-import { useHasPermission } from '@/hooks/useHasPermission';
 import { Permission } from '@/config/routes';
+import { useHasPermission } from '@/hooks/useHasPermission';
+import type { Client, PaginatedClientsResponse } from '@/types/api';
+import {
+    createColumnHelper,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getSortedRowModel,
+    useReactTable,
+    type ColumnFiltersState,
+    type SortingState,
+} from '@tanstack/react-table';
+import { ArrowUpDown, ChevronLeft, ChevronRight, Edit, MoreVertical, Search, UserCheck, UserX } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-const columnHelper = createColumnHelper<UserWithPermissions>();
+const columnHelper = createColumnHelper<Client>();
 
-interface UserActionsProps {
-    user: UserWithPermissions;
-    onEditUser: (user: UserWithPermissions) => void;
-    onRefreshUsers: () => void;
+interface ClientActionsProps {
+    client: Client;
+    onEditClient: (client: Client) => void;
+    onRefreshClients: () => void;
 }
 
-function UserActions({ user, onEditUser, onRefreshUsers }: UserActionsProps) {
+function ClientActions({ client, onEditClient, onRefreshClients }: ClientActionsProps) {
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const handleToggleUserStatus = async () => {
+    const handleToggleClientStatus = async () => {
         setIsUpdating(true);
         try {
-            if (user.active) {
-                await deleteUser(user.id);
-                toast.success(`Usuario ${user.name} desactivado correctamente`);
+            if (client.active) {
+                await deleteClient(client.id);
+                toast.success(`Cliente ${client.forename} ${client.surname} desactivado correctamente`);
             } else {
-                await restoreUser(user.id);
-                toast.success(`Usuario ${user.name} activado correctamente`);
+                await restoreClient(client.id);
+                toast.success(`Cliente ${client.forename} ${client.surname} activado correctamente`);
             }
-            onRefreshUsers();
+            onRefreshClients();
         } catch (error) {
-            console.error('Error toggling user status:', error);
-            toast.error(`Error al ${user.active ? 'desactivar' : 'activar'} el usuario`);
+            console.error('Error toggling client status:', error);
+            toast.error(`Error al ${client.active ? 'desactivar' : 'activar'} el cliente`);
         } finally {
             setIsUpdating(false);
         }
@@ -84,26 +83,26 @@ function UserActions({ user, onEditUser, onRefreshUsers }: UserActionsProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover border-border">
                 <DropdownMenuItem
-                    onClick={() => onEditUser(user)}
+                    onClick={() => onEditClient(client)}
                     className="cursor-pointer hover:bg-accent focus:bg-accent"
                 >
                     <Edit className="mr-2 h-4 w-4" />
-                    <span>Editar usuario</span>
+                    <span>Editar cliente</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    onClick={handleToggleUserStatus}
+                    onClick={handleToggleClientStatus}
                     disabled={isUpdating}
                     className="cursor-pointer hover:bg-accent focus:bg-accent"
                 >
-                    {user.active ? (
+                    {client.active ? (
                         <>
                             <UserX className="mr-2 h-4 w-4 text-destructive" />
-                            <span className="text-destructive">Desactivar usuario</span>
+                            <span className="text-destructive">Desactivar cliente</span>
                         </>
                     ) : (
                         <>
                             <UserCheck className="mr-2 h-4 w-4 text-green-600 dark:text-green-400" />
-                            <span className="text-green-600 dark:text-green-400">Activar usuario</span>
+                            <span className="text-green-600 dark:text-green-400">Activar cliente</span>
                         </>
                     )}
                 </DropdownMenuItem>
@@ -113,17 +112,30 @@ function UserActions({ user, onEditUser, onRefreshUsers }: UserActionsProps) {
 }
 
 export default function ClientsList() {
-    const [users, setUsers] = useState<UserWithPermissions[]>([]);
+    const [paginationData, setPaginationData] = useState<PaginatedClientsResponse | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [globalFilter, setGlobalFilter] = useState('');
+    
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [perPage] = useState(10);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeFilter] = useState<boolean | undefined>(undefined);
 
-    const [editingUser, setEditingUser] = useState<UserWithPermissions | null>(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [debouncedSearch, setDebouncedSearch] = useState('');
 
-    const canEdit = useHasPermission(Permission.EDIT_USERS);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setCurrentPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    const canEdit = useHasPermission(Permission.EDIT_CLIENTS);
 
     const columns = [
         columnHelper.accessor('id', {
@@ -144,14 +156,15 @@ export default function ClientsList() {
             ),
             size: 80,
         }),
-        columnHelper.accessor('name', {
+        columnHelper.accessor((row) => `${row.forename} ${row.surname}`, {
+            id: 'fullName',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
                 >
-                    Nombre
+                    Nombre Completo
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -161,31 +174,14 @@ export default function ClientsList() {
                 </span>
             ),
         }),
-        columnHelper.accessor('username', {
+        columnHelper.accessor('phone', {
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
                 >
-                    Usuario
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            ),
-            cell: (info) => (
-                <span className="font-mono text-sm text-muted-foreground">
-                    @{info.getValue()}
-                </span>
-            ),
-        }),
-        columnHelper.accessor('email', {
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                    className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
-                >
-                    Email
+                    Teléfono
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -195,32 +191,22 @@ export default function ClientsList() {
                 </span>
             ),
         }),
-        columnHelper.accessor('role.displayName', {
+        columnHelper.accessor('address', {
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
                 >
-                    Rol
+                    Dirección
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
-            cell: (info) => {
-                const role = info.row.original.role;
-                const isAdmin = role.name === 'admin';
-                return (
-                    <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isAdmin
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                            }`}
-                    >
-                        {info.getValue()}
-                    </span>
-                );
-            },
-            size: 120,
+            cell: (info) => (
+                <span className="text-foreground">
+                    {info.getValue()}
+                </span>
+            ),
         }),
         columnHelper.accessor('active', {
             header: ({ column }) => (
@@ -272,16 +258,40 @@ export default function ClientsList() {
             ),
             size: 160,
         }),
+        columnHelper.accessor('updated_at', {
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
+                >
+                    Fecha de Actualización
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            ),
+            cell: (info) => (
+                <span className="text-sm text-muted-foreground">
+                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    })}
+                </span>
+            ),
+            size: 160,
+        }),
         canEdit ?
             (
                 columnHelper.display({
                     id: 'actions',
                     header: '',
                     cell: ({ row }) => (
-                        <UserActions
-                            user={row.original}
-                            onEditUser={handleEditUser}
-                            onRefreshUsers={refreshUsers}
+                        <ClientActions
+                            client={row.original}
+                            onEditClient={handleEditClient}
+                            onRefreshClients={refreshClients}
                         />
                     ),
                     size: 80,
@@ -296,35 +306,30 @@ export default function ClientsList() {
             ),
     ];
 
-    const handleEditUser = (user: UserWithPermissions) => {
-        setEditingUser(user);
-        setIsEditModalOpen(true);
+    const handleEditClient = (client: Client) => {
+        // TODO: Implement edit client functionality
+        console.log('Edit client:', client);
+        toast.info('Funcionalidad de editar cliente pendiente de implementar');
     };
 
-    const handleCloseEditModal = () => {
-        setIsEditModalOpen(false);
-        setEditingUser(null);
-    };
-
-    const handleUserUpdated = (updatedUser: UserWithPermissions) => {
-        setUsers(prevUsers =>
-            prevUsers.map(user =>
-                user.id === updatedUser.id ? updatedUser : user
-            )
-        );
-    };
-
-    const refreshUsers = async () => {
+    const refreshClients = async () => {
         try {
-            const usersData = await getUsersList();
-            setUsers(usersData);
+            const clientsData = await getClientsPaginated({
+                page: currentPage,
+                per_page: perPage,
+                search: searchQuery || undefined,
+                active: activeFilter
+            });
+            setPaginationData(clientsData);
         } catch (err) {
-            console.error('Error refreshing users:', err);
+            console.error('Error refreshing clients:', err);
         }
     };
 
+    const clients = paginationData?.data || [];
+
     const table = useReactTable({
-        data: users,
+        data: clients,
         columns: columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -337,33 +342,41 @@ export default function ClientsList() {
             columnFilters,
             globalFilter,
         },
+        manualPagination: true,
+        pageCount: paginationData?.last_page || 0,
     });
-    const fetchUsers = async () => {
+
+    const fetchClients = useCallback(async () => {
         try {
             setIsLoading(true);
             setError(null);
-            const usersData = await getUsersList();
-            setUsers(usersData);
+            const clientsData = await getClientsPaginated({
+                page: currentPage,
+                per_page: perPage,
+                search: debouncedSearch || undefined,
+                active: activeFilter
+            });
+            setPaginationData(clientsData);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error al cargar usuarios');
-            console.error('Error fetching users:', err);
+            setError(err instanceof Error ? err.message : 'Error al cargar clientes');
+            console.error('Error fetching clients:', err);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [currentPage, perPage, debouncedSearch, activeFilter]);
 
     useEffect(() => {
-        fetchUsers();
-    }, []);
+        fetchClients();
+    }, [fetchClients]);
 
     if (error) {
         return (
             <div className="flex items-center justify-center p-8">
                 <div className="text-center">
-                    <p className="text-destructive font-medium">Error al cargar usuarios</p>
+                    <p className="text-destructive font-medium">Error al cargar clientes</p>
                     <p className="text-sm text-muted-foreground mt-1">{error}</p>
                     <Button
-                        onClick={() => fetchUsers()}
+                        onClick={() => fetchClients()}
                         variant="outline"
                         size="sm"
                         className="mt-4 text-foreground"
@@ -379,18 +392,18 @@ export default function ClientsList() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Lista de Usuarios</h1>
+                    <h1 className="text-2xl font-bold text-foreground">Lista de Clientes</h1>
                     <p className="text-muted-foreground">
-                        Gestiona los usuarios del sistema
+                        Gestiona los clientes del sistema
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Buscar usuarios..."
-                            value={globalFilter ?? ''}
-                            onChange={(event) => setGlobalFilter(String(event.target.value))}
+                            placeholder="Buscar clientes..."
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
                             className="pl-9 w-64"
                         />
                     </div>
@@ -421,7 +434,7 @@ export default function ClientsList() {
                                 <TableCell colSpan={columns.length} className="h-48">
                                     <div className="flex items-center justify-center">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">Cargando usuarios...</span>
+                                            <span className="text-muted-foreground">Cargando clientes...</span>
                                             <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
                                         </div>
                                     </div>
@@ -445,9 +458,9 @@ export default function ClientsList() {
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex flex-col items-center gap-2">
-                                        <p className="text-muted-foreground">No se encontraron usuarios</p>
+                                        <p className="text-muted-foreground">No se encontraron clientes</p>
                                         <p className="text-sm text-muted-foreground">
-                                            {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay usuarios registrados'}
+                                            {debouncedSearch ? 'Intenta ajustar tu búsqueda' : 'No hay clientes registrados'}
                                         </p>
                                     </div>
                                 </TableCell>
@@ -457,23 +470,60 @@ export default function ClientsList() {
                 </Table>
             </div>
 
-            {!isLoading && users.length > 0 && (
+            {!isLoading && clients.length > 0 && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div>
-                        Mostrando {table.getFilteredRowModel().rows.length} de {users.length} usuario(s)
+                        Mostrando {paginationData?.from || 0} a {paginationData?.to || 0} de {paginationData?.total || 0} cliente(s)
                     </div>
                     <div className="flex items-center gap-2">
-                        <span>Total: {users.length} usuario(s)</span>
+                        <span>Página {paginationData?.current_page || 1} de {paginationData?.last_page || 1}</span>
                     </div>
                 </div>
             )}
 
-            <EditUserModal
-                user={editingUser}
-                isOpen={isEditModalOpen}
-                onClose={handleCloseEditModal}
-                onUserUpdated={handleUserUpdated}
-            />
+            {paginationData && paginationData.last_page > 1 && (
+                <div className="flex items-center justify-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage <= 1 || isLoading}
+                        className="flex items-center gap-1"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                        Anterior
+                    </Button>
+                    
+                    <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, paginationData.last_page) }, (_, i) => {
+                            const page = i + 1;
+                            return (
+                                <Button
+                                    key={page}
+                                    variant={currentPage === page ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setCurrentPage(page)}
+                                    disabled={isLoading}
+                                    className="w-8 h-8 p-0"
+                                >
+                                    {page}
+                                </Button>
+                            );
+                        })}
+                    </div>
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(Math.min(paginationData.last_page, currentPage + 1))}
+                        disabled={currentPage >= paginationData.last_page || isLoading}
+                        className="flex items-center gap-1"
+                    >
+                        Siguiente
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }

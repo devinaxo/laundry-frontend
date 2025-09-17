@@ -1,4 +1,3 @@
-import ClientsList from '@/pages/clients/ClientsList';
 import type { LucideIcon } from 'lucide-react';
 import { BookPlus, BookUser, ClipboardList, Home, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
 import { lazy } from 'react';
@@ -8,11 +7,11 @@ const DashboardContent = lazy(() => import('@/pages/dashboard/DashboardContent')
 const UsersPage = lazy(() => import('@/pages/users/UsersList'));
 const CreateUserPage = lazy(() => import('@/pages/users/NewUser'));
 const RolesPage = lazy(() => import('@/pages/roles/RolesList'));
+const ClientsPage = lazy(() => import('@/pages/clients/ClientsList'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 const OrdersPage = lazy(() => import('@/pages/mock/OrdersPage'));
 const CreateOrderPage = lazy(() => import('@/pages/mock/CreateOrderPage'));
-const CustomersPage = lazy(() => import('@/pages/mock/CustomersPage'));
 const CreateCustomerPage = lazy(() => import('@/pages/mock/CreateCustomerPage'));
 const InventoryPage = lazy(() => import('@/pages/mock/InventoryPage'));
 const CreateInventoryPage = lazy(() => import('@/pages/mock/CreateInventoryPage'));
@@ -147,7 +146,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: ClientsList,
+                component: ClientsPage,
                 title: 'Ver clientes',
                 icon: BookUser,
                 showInSidebar: true,

@@ -34,6 +34,19 @@ export interface User {
     role: Role;
 }
 
+export interface Client {
+    id: number,
+    forename: string,
+    surname: string,
+    phone: string,
+    address: string,
+    latitude: string,
+    longitude: string,
+    active: boolean,
+    created_at: string,
+    updated_at: string,
+}
+
 // Request interfaces
 export interface LoginRequest {
     username: string;
@@ -73,3 +86,36 @@ export interface ApiError {
     errors?: Record<string, string[]>;
     status?: number;
 }
+
+// Pagination interfaces
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    page: number | null;
+    active: boolean;
+}
+
+export interface PaginatedResponse<T> {
+    current_page: number;
+    data: T[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: PaginationLink[];
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+}
+
+export interface PaginatedClientRequest {
+    search?: string;
+    active?: boolean;
+    per_page: number;
+    page: number;
+}
+
+export type PaginatedClientsResponse = PaginatedResponse<Client>;
