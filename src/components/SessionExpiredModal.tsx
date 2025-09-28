@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
     Dialog,
     DialogContent,
@@ -13,7 +12,6 @@ import { useSessionExpired } from '@/contexts/SessionExpiredContext';
 import { AlertTriangle } from 'lucide-react';
 
 export const SessionExpiredModal: React.FC = () => {
-    const navigate = useNavigate();
     const { isSessionExpired, hideSessionExpiredModal } = useSessionExpired();
 
     const handleRedirectToLogin = () => {
@@ -22,7 +20,7 @@ export const SessionExpiredModal: React.FC = () => {
 
         hideSessionExpiredModal();
 
-        navigate('/login', { replace: true });
+        window.location.href = '/login';
     };
 
     return (
