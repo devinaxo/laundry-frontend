@@ -1,5 +1,5 @@
 import instance from '../lib/axios';
-import type { UserWithPermissions, Role, Client } from '../types/api';
+import type { UserWithPermissions, Role, Client, Order } from '../types/api';
 
 /**
  * User related PATCH API calls
@@ -35,5 +35,24 @@ export const restoreClient = (clientId: number): Promise<{ message: string }> =>
 
 export const updateClient = (clientId: number, clientData: Partial<Client>): Promise<Client> => {
     return instance.patch(`/clients/${clientId}`, clientData)
+        .then((response) => response.data);
+};
+
+/**
+ * Order related PATCH API calls
+ */
+
+export const updateOrderStatus = (orderId: number, status: 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled'): Promise<{ success: boolean, message: string, data: Order }> => {
+    return instance.patch(`/orders/${orderId}/status`, { status })
+        .then((response) => response.data);
+};
+
+export const updateOrder = (orderId: number, orderData: {
+    status?: 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled';
+    estimated_delivery_date?: string;
+    actual_delivery_date?: string;
+    notes?: string;
+}): Promise<Order> => {
+    return instance.patch(`/orders/${orderId}`, orderData)
         .then((response) => response.data);
 };

@@ -153,13 +153,13 @@ const NewOrder: React.FC = () => {
         }
 
         if (orderItems.length === 0) {
-            toast.error('Debe agregar al menos un item');
+            toast.error('Debe agregar al menos un artículo a la orden');
             return;
         }
 
         const invalidItems = orderItems.filter(item => !item.subcategory_id || item.quantity < 1);
         if (invalidItems.length > 0) {
-            toast.error('Todos los items deben tener una subcategoría válida y cantidad mayor a 0');
+            toast.error('Todos los artículos deben tener un tipo válido y cantidad mayor a 0');
             return;
         }
 
@@ -334,7 +334,7 @@ const NewOrder: React.FC = () => {
 
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-semibold">Items de la Orden <span className="text-red-500">*</span></h3>
+                                <h3 className="text-lg font-semibold">Artículos de la Orden <span className="text-red-500">*</span></h3>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -344,7 +344,7 @@ const NewOrder: React.FC = () => {
                                     className="flex items-center gap-2"
                                 >
                                     <Plus className="h-4 w-4" />
-                                    Agregar Item
+                                    Agregar artículo
                                 </Button>
                             </div>
 

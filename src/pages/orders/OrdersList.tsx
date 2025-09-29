@@ -1,4 +1,5 @@
 import { getOrdersPaginated } from '@/api/getFetches';
+import { updateOrderStatus } from '@/api/patchFetches';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -20,6 +21,9 @@ import {
 import { Permission } from '@/config/routes';
 import { useHasPermission } from '@/hooks/useHasPermission';
 import type { Order, PaginatedOrdersResponse } from '@/types/api';
+import EditOrderModal from '@/components/orders/EditOrderModal';
+import ClientMapModal from '@/components/clients/ClientMapModal';
+import OrderDetailsModal from '@/components/orders/OrderDetailsModal';
 import {
     createColumnHelper,
     flexRender,
@@ -39,21 +43,37 @@ import {
     Search,
     Calendar,
     Package,
-    User,
-    DollarSign
+    DollarSign,
+    Check,
+    Phone,
+    MapPin,
+    Eye
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { statusColors, statusLabels } from '@/components/orders/statuses';
 
 const columnHelper = createColumnHelper<Order>();
 
 interface OrderActionsProps {
     order: Order;
     onEditOrder: (order: Order) => void;
+    onMarkAsDelivered: (order: Order) => Promise<void>;
+    onViewDetails: (order: Order) => void;
+    isMarkingAsDelivered?: boolean;
 }
 
-function OrderActions({ order, onEditOrder }: OrderActionsProps) {
+function OrderActions({ order, onEditOrder, onMarkAsDelivered, onViewDetails, isMarkingAsDelivered = false }: OrderActionsProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    const handleMarkAsDelivered = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await onMarkAsDelivered(order);
+    };
+    
     return (
-        <DropdownMenu>
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="ghost"
@@ -65,32 +85,108 @@ function OrderActions({ order, onEditOrder }: OrderActionsProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover border-border">
                 <DropdownMenuItem
-                    onClick={() => onEditOrder(order)}
+                    onClick={() => {
+                        onViewDetails(order);
+                        setIsOpen(false);
+                    }}
+                    className="cursor-pointer hover:bg-accent focus:bg-accent"
+                >
+                    <Eye className="mr-2 h-4 w-4" />
+                    <span>Ver detalles</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={() => {
+                        onEditOrder(order);
+                        setIsOpen(false);
+                    }}
                     className="cursor-pointer hover:bg-accent focus:bg-accent"
                 >
                     <Edit className="mr-2 h-4 w-4" />
                     <span>Editar pedido</span>
                 </DropdownMenuItem>
+                {order.status !== 'delivered' && (
+                    <DropdownMenuItem
+                        onClick={handleMarkAsDelivered}
+                        className="cursor-pointer hover:bg-accent focus:bg-accent"
+                        disabled={isMarkingAsDelivered}
+                    >
+                        {isMarkingAsDelivered ? (
+                            <Spinner className="mr-2 h-4 w-4" />
+                        ) : (
+                            <Check className="mr-2 h-4 w-4" />
+                        )}
+                        <span>
+                            {isMarkingAsDelivered ? 'Marcando...' : 'Marcar como entregada'}
+                        </span>
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     );
 }
 
-const statusColors = {
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-    in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    ready: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    delivered: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
-    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-};
+interface QuickStatusActionsProps {
+    order: Order;
+    onStatusUpdate: (order: Order, newStatus: Order['status']) => Promise<void>;
+    updatingStatus?: Order['status'] | null;
+}
 
-const statusLabels = {
-    pending: 'Pendiente',
-    in_progress: 'En Proceso',
-    ready: 'Listo',
-    delivered: 'Entregado',
-    cancelled: 'Cancelado',
-};
+function QuickStatusActions({ order, onStatusUpdate, updatingStatus = null }: QuickStatusActionsProps) {
+    const getAvailableActions = (currentStatus: Order['status']) => {
+        switch (currentStatus) {
+            case 'pending':
+                return [
+                    { status: 'in_progress' as const, label: 'En Proceso', color: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                    { status: 'cancelled' as const, label: 'Cancelar', color: 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400' }
+                ];
+            case 'in_progress':
+                return [
+                    { status: 'ready' as const, label: 'Listo', color: 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400' },
+                    { status: 'cancelled' as const, label: 'Cancelar', color: 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400' }
+                ];
+            case 'ready':
+                return [
+                    { status: 'delivered' as const, label: 'Entregar', color: 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400' },
+                    { status: 'cancelled' as const, label: 'Cancelar', color: 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400' }
+                ];
+            default:
+                return [];
+        }
+    };
+
+    const actions = getAvailableActions(order.status);
+    
+    if (actions.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="flex items-center gap-1">
+            {actions.map((action) => {
+                const isThisButtonUpdating = updatingStatus === action.status;
+                return (
+                    <Button
+                        key={action.status}
+                        size="sm"
+                        variant="ghost"
+                        className={`h-6 px-2 text-xs font-medium rounded-md transition-colors ${
+                            isThisButtonUpdating ? 'opacity-50 cursor-not-allowed' : action.color
+                        }`}
+                        onClick={() => onStatusUpdate(order, action.status)}
+                        disabled={updatingStatus !== null}
+                        title={`Cambiar estado a ${action.label}`}
+                    >
+                        {isThisButtonUpdating ? (
+                            <Spinner className="h-3 w-3" />
+                        ) : (
+                            action.label
+                        )}
+                    </Button>
+                );
+            })}
+        </div>
+    );
+}
 
 export default function OrdersList() {
     const [paginationData, setPaginationData] = useState<PaginatedOrdersResponse | null>(null);
@@ -109,6 +205,15 @@ export default function OrdersList() {
     const [dateToFilter, setDateToFilter] = useState('');
 
     const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [clientMapModalOpen, setClientMapModalOpen] = useState(false);
+    const [selectedClient, setSelectedClient] = useState<Order['client'] | null>(null);
+    const [orderDetailsModalOpen, setOrderDetailsModalOpen] = useState(false);
+    const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<Order | null>(null);
+    const [markingAsDeliveredOrderId, setMarkingAsDeliveredOrderId] = useState<number | null>(null);
+    const [updatingStatusData, setUpdatingStatusData] = useState<{ orderId: number; status: Order['status'] } | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -151,13 +256,35 @@ export default function OrdersList() {
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
-            cell: (info) => (
-                <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">
-                        {info.getValue()}
-                    </span>
-                </div>
-            ),
+            cell: (info) => {
+                const client = info.row.original.client;
+                return (
+                    <div className="space-y-1">
+                        <div className="font-medium text-foreground">
+                            {info.getValue()}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <button
+                                onClick={() => handleWhatsAppClick(client.phone)}
+                                className="flex items-center gap-1 text-green-600 hover:text-green-700 transition-colors"
+                                title="Enviar mensaje por WhatsApp"
+                            >
+                                <Phone className="h-3 w-3" />
+                                <span>{client.phone}</span>
+                            </button>
+                            <button
+                                onClick={() => handleShowClientMap(client)}
+                                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors ml-2"
+                                title="Ver ubicación en mapa"
+                            >
+                                <MapPin className="h-3 w-3" />
+                                <span className="text-xs">Mapa</span>
+                            </button>
+                        </div>
+                    </div>
+                );
+            },
+            size: 200,
         }),
         columnHelper.accessor('status', {
             header: ({ column }) => (
@@ -173,14 +300,21 @@ export default function OrdersList() {
             cell: (info) => {
                 const status = info.getValue();
                 return (
-                    <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[status]}`}
-                    >
-                        {statusLabels[status]}
-                    </span>
+                    <div className="space-y-2">
+                        <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[status]}`}
+                        >
+                            {statusLabels[status]}
+                        </span>
+                        <QuickStatusActions 
+                            order={info.row.original}
+                            onStatusUpdate={handleQuickStatusUpdate}
+                            updatingStatus={updatingStatusData?.orderId === info.row.original.id ? updatingStatusData.status : null}
+                        />
+                    </div>
                 );
             },
-            size: 120,
+            size: 160,
         }),
         columnHelper.accessor('total', {
             header: ({ column }) => (
@@ -307,6 +441,9 @@ export default function OrdersList() {
                         <OrderActions
                             order={row.original}
                             onEditOrder={handleEditOrder}
+                            onMarkAsDelivered={handleMarkAsDelivered}
+                            onViewDetails={handleViewDetails}
+                            isMarkingAsDelivered={markingAsDeliveredOrderId === row.original.id}
                         />
                     ),
                     size: 80,
@@ -322,8 +459,62 @@ export default function OrdersList() {
     ];
 
     const handleEditOrder = (order: Order) => {
-        // TODO: Implement edit order modal when it's created
-        console.log('Edit order:', order);
+        setSelectedOrder(order);
+        setEditModalOpen(true);
+    };
+
+    const handleViewDetails = (order: Order) => {
+        setSelectedOrderForDetails(order);
+        setOrderDetailsModalOpen(true);
+    };
+
+    const handleMarkAsDelivered = async (order: Order): Promise<void> => {
+        setMarkingAsDeliveredOrderId(order.id);
+        try {
+            await updateOrderStatus(order.id, 'delivered');
+            toast.success('Pedido marcado como entregado');
+            await fetchOrders();
+        } catch (error) {
+            console.error('Error marking order as delivered:', error);
+            toast.error('Error al marcar el pedido como entregado');
+        } finally {
+            setMarkingAsDeliveredOrderId(null);
+        }
+    };
+
+    const handleQuickStatusUpdate = async (order: Order, newStatus: Order['status']): Promise<void> => {
+        setUpdatingStatusData({ orderId: order.id, status: newStatus });
+        try {
+            await updateOrderStatus(order.id, newStatus);
+            const statusMessages = {
+                'pending': 'Pedido marcado como pendiente',
+                'in_progress': 'Pedido marcado como en proceso',
+                'ready': 'Pedido marcado como listo',
+                'delivered': 'Pedido marcado como entregado',
+                'cancelled': 'Pedido cancelado'
+            };
+            toast.success(statusMessages[newStatus]);
+            await fetchOrders();
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            toast.error('Error al actualizar el estado del pedido');
+        } finally {
+            setUpdatingStatusData(null);
+        }
+    };
+
+    const handleOrderUpdated = () => {
+        fetchOrders();
+    };
+
+    const handleShowClientMap = (client: Order['client']) => {
+        setSelectedClient(client);
+        setClientMapModalOpen(true);
+    };
+
+    const handleWhatsAppClick = (phoneNumber: string) => {
+        const cleanedNumber = phoneNumber.replace(/\D/g, '');
+        window.open(`https://wa.me/${cleanedNumber}`, '_blank');
     };
 
     const orders = paginationData?.data || [];
@@ -582,6 +773,25 @@ export default function OrdersList() {
                     </Button>
                 </div>
             )}
+            
+            <EditOrderModal
+                order={selectedOrder}
+                isOpen={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                onOrderUpdated={handleOrderUpdated}
+            />
+            
+            <OrderDetailsModal
+                order={selectedOrderForDetails}
+                isOpen={orderDetailsModalOpen}
+                onClose={() => setOrderDetailsModalOpen(false)}
+            />
+            
+            <ClientMapModal
+                client={selectedClient}
+                isOpen={clientMapModalOpen}
+                onClose={() => setClientMapModalOpen(false)}
+            />
         </div>
     );
 }
