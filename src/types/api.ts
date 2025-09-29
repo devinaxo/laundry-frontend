@@ -68,6 +68,35 @@ export interface Subcategory {
     category: Category;
 }
 
+export interface OrderItem {
+    id?: number;
+    order_id?: number;
+    subcategory_id: number;
+    quantity: number;
+    unit_price?: string;
+    subtotal?: string;
+    notes?: string;
+    created_at?: string;
+    updated_at?: string;
+    subcategory?: Subcategory;
+}
+
+export interface Order {
+    id: number;
+    client_id: number;
+    order_number: string;
+    status: 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled';
+    total: string;
+    reception_date: string;
+    estimated_delivery_date?: string;
+    actual_delivery_date?: string;
+    notes?: string;
+    created_at: string;
+    updated_at: string;
+    client: Client;
+    items: OrderItem[];
+}
+
 // Request interfaces
 export interface LoginRequest {
     username: string;
@@ -119,6 +148,18 @@ export interface UpdateSubcategoryRequest {
     description?: string;
     price?: number;
     active?: boolean;
+}
+
+export interface CreateOrderRequest {
+    client_id: number;
+    reception_date: string;
+    estimated_delivery_date?: string;
+    notes?: string;
+    items: {
+        subcategory_id: number;
+        quantity: number;
+        notes?: string;
+    }[];
 }
 
 export interface UpdateClientRequest {
@@ -188,4 +229,15 @@ export interface PaginatedClientRequest {
     page: number;
 }
 
+export interface PaginatedOrderRequest {
+    search?: string;
+    client_id?: number;
+    status?: 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled';
+    fecha_desde?: string;
+    fecha_hasta?: string;
+    per_page: number;
+    page: number;
+}
+
 export type PaginatedClientsResponse = PaginatedResponse<Client>;
+export type PaginatedOrdersResponse = PaginatedResponse<Order>;

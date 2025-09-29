@@ -15,10 +15,8 @@ const SubcategoriesPage = lazy(() => import('@/pages/subcategories/Subcategories
 const CreateSubcategoriesPage = lazy(() => import('@/pages/subcategories/NewSubcategory'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
-const OrdersPage = lazy(() => import('@/pages/mock/OrdersPage'));
-const CreateOrderPage = lazy(() => import('@/pages/mock/CreateOrderPage'));
-const InventoryPage = lazy(() => import('@/pages/mock/InventoryPage'));
-const CreateInventoryPage = lazy(() => import('@/pages/mock/CreateInventoryPage'));
+const OrdersPage = lazy(() => import('@/pages/orders/OrdersList'));
+const CreateOrderPage = lazy(() => import('@/pages/orders/NewOrder'));
 
 // Actual perms
 export const Permission = {
