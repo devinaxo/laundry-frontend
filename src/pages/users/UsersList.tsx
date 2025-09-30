@@ -21,6 +21,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import ViewModeToggle from '@/components/ui/ViewModeToggle';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { Button } from '@/components/ui/button';
@@ -30,11 +32,13 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ArrowUpDown, Search, Edit, UserX, UserCheck, MoreVertical } from 'lucide-react';
+import { ArrowUpDown, Search, Edit, UserX, UserCheck, MoreVertical, User, Mail, Calendar } from 'lucide-react';
 import EditUserModal from '@/components/users/EditUserModal';
 import { toast } from 'sonner';
 import { useHasPermission } from '@/hooks/useHasPermission';
+import { useViewPreference } from '@/hooks/useViewPreference';
 import { Permission } from '@/config/routes';
+import { formatDateTime } from '@/lib/utils';
 
 const columnHelper = createColumnHelper<UserWithPermissions>();
 
@@ -119,6 +123,7 @@ export default function UsersList() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [globalFilter, setGlobalFilter] = useState('');
+    const [viewMode, setViewMode] = useViewPreference('users', 'table');
 
     const [editingUser, setEditingUser] = useState<UserWithPermissions | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -261,13 +266,7 @@ export default function UsersList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,
@@ -384,7 +383,11 @@ export default function UsersList() {
                         Gestiona los usuarios del sistema
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
+                    <ViewModeToggle 
+                        viewMode={viewMode} 
+                        onViewModeChange={setViewMode} 
+                    />
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -397,65 +400,157 @@ export default function UsersList() {
                 </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-border">
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-48">
-                                    <div className="flex items-center justify-center">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">Cargando usuarios...</span>
-                                            <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
-                                        </div>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && 'selected'}
-                                    className="border-b border-border transition-colors"
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="py-3">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
+            {viewMode === 'table' ? (
+                <div className="rounded-lg border border-border bg-card">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id} className="border-b border-border">
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <p className="text-muted-foreground">No se encontraron usuarios</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay usuarios registrados'}
-                                        </p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-48">
+                                        <div className="flex items-center justify-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-muted-foreground">Cargando usuarios...</span>
+                                                <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && 'selected'}
+                                        className="border-b border-border transition-colors"
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id} className="py-3">
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <p className="text-muted-foreground">No se encontraron usuarios</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay usuarios registrados'}
+                                            </p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">Cargando usuarios...</span>
+                                <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
+                            </div>
+                        </div>
+                    ) : table.getFilteredRowModel().rows?.length ? (
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {table.getFilteredRowModel().rows.map((row) => {
+                                const user = row.original;
+                                const isAdmin = user.role.name === 'admin';
+                                return (
+                                    <Card key={user.id} className="transition-shadow hover:shadow-md">
+                                        <CardHeader className="pb-3">
+                                            <div className="flex items-start justify-between">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <User className="h-4 w-4 text-muted-foreground" />
+                                                        <h3 className="font-medium text-foreground">
+                                                            {user.name}
+                                                        </h3>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                                        <span className="font-mono">@{user.username}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                                                            user.active
+                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                                        }`}
+                                                    >
+                                                        {user.active ? 'Activo' : 'Inactivo'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div className="space-y-2">
+                                                <div className="flex items-center gap-2 text-sm">
+                                                    <Mail className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-foreground">{user.email}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                            isAdmin
+                                                                ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                                                        }`}
+                                                    >
+                                                        {user.role.displayName}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-between pt-2 border-t border-border">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                    <Calendar className="h-3 w-3" />
+                                                    <span>ID: {user.id}</span>
+                                                </div>
+                                                {canEdit && (
+                                                    <UserActions
+                                                        user={user}
+                                                        onEditUser={handleEditUser}
+                                                        onRefreshUsers={refreshUsers}
+                                                    />
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <div className="text-center space-y-2">
+                                <p className="text-muted-foreground">No se encontraron usuarios</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay usuarios registrados'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {!isLoading && users.length > 0 && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">

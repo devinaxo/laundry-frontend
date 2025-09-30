@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/table';
 import { Permission } from '@/config/routes';
 import { useHasPermission } from '@/hooks/useHasPermission';
+import { formatDateTime } from '@/lib/utils';
 import type { Role } from '@/types/api';
 import {
     createColumnHelper,
@@ -145,13 +146,7 @@ export default function RolesList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,
@@ -169,13 +164,7 @@ export default function RolesList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,

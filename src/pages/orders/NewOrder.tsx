@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -36,6 +36,8 @@ interface OrderItem {
 
 const NewOrder: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const fromDashboard = searchParams.get('from') === 'dashboard';
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [clients, setClients] = useState<Client[]>([]);
     const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -47,7 +49,6 @@ const NewOrder: React.FC = () => {
     const [formData, setFormData] = useState({
         client_id: '',
         reception_date: new Date().toISOString().split('T')[0],
-        estimated_delivery_date: '',
         notes: ''
     });
 
@@ -163,18 +164,12 @@ const NewOrder: React.FC = () => {
             return;
         }
 
-        if (formData.estimated_delivery_date && formData.estimated_delivery_date <= formData.reception_date) {
-            toast.error('La fecha de entrega estimada debe ser posterior a la fecha de recepción');
-            return;
-        }
-
         setIsSubmitting(true);
 
         try {
             const orderData: CreateOrderRequest = {
                 client_id: parseInt(formData.client_id),
                 reception_date: formData.reception_date,
-                estimated_delivery_date: formData.estimated_delivery_date || undefined,
                 notes: formData.notes.trim() || undefined,
                 items: orderItems.map(item => ({
                     subcategory_id: parseInt(item.subcategory_id),
@@ -206,7 +201,11 @@ const NewOrder: React.FC = () => {
     };
 
     const handleCancel = () => {
-        navigate('/orders/list');
+        if (fromDashboard) {
+            navigate('/');
+        } else {
+            navigate('/orders/list');
+        }
     };
 
     const getClientDisplayName = (client: Client) => {
@@ -301,22 +300,8 @@ const NewOrder: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <Label htmlFor="estimated_delivery_date">Fecha de Entrega Estimada</Label>
-                                <Input
-                                    id="estimated_delivery_date"
-                                    name="estimated_delivery_date"
-                                    type="date"
-                                    value={formData.estimated_delivery_date}
-                                    onChange={handleInputChange}
-                                    disabled={isSubmitting}
-                                    min={formData.reception_date}
-                                />
-                            </div>
-
-                            <div>
-                                <Label htmlFor="notes">Notas Generales</Label>
+                        <div>
+                            <Label htmlFor="notes">Notas Generales</Label>
                                 <Textarea
                                     id="notes"
                                     name="notes"
@@ -327,7 +312,6 @@ const NewOrder: React.FC = () => {
                                     maxLength={1000}
                                     rows={3}
                                 />
-                            </div>
                         </div>
 
                         <Separator />

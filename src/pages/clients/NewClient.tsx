@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,8 @@ import { createClient } from '@/api/postFetches';
 
 const NewClient: React.FC = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const fromDashboard = searchParams.get('from') === 'dashboard';
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         forename: '',
@@ -84,7 +86,11 @@ const NewClient: React.FC = () => {
     };
 
     const handleCancel = () => {
-        navigate('/clients/list');
+        if (fromDashboard) {
+            navigate('/');
+        } else {
+            navigate('/clients/list');
+        }
     };
 
     return (

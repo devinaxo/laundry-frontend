@@ -1,22 +1,18 @@
+import CategoriesList from '@/pages/categories/CategoriesList';
+import NewCategory from '@/pages/categories/NewCategory';
+import ClientsList from '@/pages/clients/ClientsList';
+import NewClient from '@/pages/clients/NewClient';
+import Dashboard from '@/pages/dashboard/DashboardContent';
+import NotFound from '@/pages/NotFound';
+import NewOrder from '@/pages/orders/NewOrder';
+import OrdersList from '@/pages/orders/OrdersList';
+import RolesList from '@/pages/roles/RolesList';
+import NewSubcategory from '@/pages/subcategories/NewSubcategory';
+import SubcategoriesList from '@/pages/subcategories/SubcategoriesList';
+import NewUser from '@/pages/users/NewUser';
+import UsersList from '@/pages/users/UsersList';
 import type { LucideIcon } from 'lucide-react';
 import { BookPlus, BookUser, ClipboardList, Home, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
-import { lazy } from 'react';
-
-// Lazy load components
-const DashboardContent = lazy(() => import('@/pages/dashboard/DashboardContent'));
-const UsersPage = lazy(() => import('@/pages/users/UsersList'));
-const CreateUserPage = lazy(() => import('@/pages/users/NewUser'));
-const RolesPage = lazy(() => import('@/pages/roles/RolesList'));
-const ClientsPage = lazy(() => import('@/pages/clients/ClientsList'));
-const CreateClientPage = lazy(() => import('@/pages/clients/NewClient'));
-const CategoriesPage = lazy(() => import('@/pages/categories/CategoriesList'));
-const CreateCategoriesPage = lazy(() => import('@/pages/categories/NewCategory'));
-const SubcategoriesPage = lazy(() => import('@/pages/subcategories/SubcategoriesList'));
-const CreateSubcategoriesPage = lazy(() => import('@/pages/subcategories/NewSubcategory'));
-const NotFound = lazy(() => import('@/pages/NotFound'));
-
-const OrdersPage = lazy(() => import('@/pages/orders/OrdersList'));
-const CreateOrderPage = lazy(() => import('@/pages/orders/NewOrder'));
 
 // Actual perms
 export const Permission = {
@@ -92,7 +88,7 @@ export interface RouteConfig {
 export const routes: RouteConfig[] = [
     {
         path: '/',
-        component: DashboardContent,
+        component: Dashboard,
         title: 'Dashboard',
         icon: Home,
         showInSidebar: true,
@@ -110,7 +106,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: UsersPage,
+                component: UsersList,
                 title: 'Lista de usuarios',
                 icon: Users,
                 showInSidebar: true,
@@ -119,7 +115,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: CreateUserPage,
+                component: NewUser,
                 title: 'Crear usuario',
                 icon: UserPlus,
                 showInSidebar: true,
@@ -130,7 +126,7 @@ export const routes: RouteConfig[] = [
     },
     {
         path: '/roles/list',
-        component: RolesPage,
+        component: RolesList,
         title: 'Roles',
         icon: UserCog,
         showInSidebar: true,
@@ -148,7 +144,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: ClientsPage,
+                component: ClientsList,
                 title: 'Ver clientes',
                 icon: BookUser,
                 showInSidebar: true,
@@ -157,7 +153,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: CreateClientPage,
+                component: NewClient,
                 title: 'Agregar cliente',
                 icon: BookPlus,
                 showInSidebar: true,
@@ -177,7 +173,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: OrdersPage,
+                component: OrdersList,
                 title: 'Ver órdenes',
                 icon: ClipboardList,
                 showInSidebar: true,
@@ -186,7 +182,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: CreateOrderPage,
+                component: NewOrder,
                 title: 'Crear órden',
                 icon: Plus,
                 showInSidebar: true,
@@ -206,7 +202,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: CategoriesPage,
+                component: CategoriesList,
                 title: 'Ver categorías',
                 icon: Package,
                 showInSidebar: true,
@@ -215,7 +211,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: CreateCategoriesPage,
+                component: NewCategory,
                 title: 'Agregar categoría',
                 icon: PackagePlus,
                 showInSidebar: true,
@@ -235,7 +231,7 @@ export const routes: RouteConfig[] = [
         children: [
             {
                 path: '/list',
-                component: SubcategoriesPage,
+                component: SubcategoriesList,
                 title: 'Ver subcategorías',
                 icon: Package,
                 showInSidebar: true,
@@ -244,7 +240,7 @@ export const routes: RouteConfig[] = [
             },
             {
                 path: '/new',
-                component: CreateSubcategoriesPage,
+                component: NewSubcategory,
                 title: 'Agregar subcategoría',
                 icon: PackagePlus,
                 showInSidebar: true,
