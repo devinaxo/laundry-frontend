@@ -152,7 +152,7 @@ const NewUser: React.FC = () => {
 
             await createUser(userData);
             toast.success('Usuario creado exitosamente');
-            navigate('/users');
+            navigate('/users/list');
         } catch (error: unknown) {
             console.error('Error creating user:', error);
 

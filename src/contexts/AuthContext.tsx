@@ -59,6 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             setIsLoading(false);
             toast.success("Sesión iniciada correctamente");
+            window.location.href = '/';
             return true;
         } catch (error) {
             console.error('Login error:', error);
