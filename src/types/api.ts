@@ -47,6 +47,51 @@ export interface Client {
     updated_at: string,
 }
 
+export interface DashboardData {
+    orders_today: {
+        count: number;
+        increase_percentage: number;
+        yesterday_count: number;
+    };
+    pending_orders: {
+        count: number;
+    };
+    revenue: {
+        today: {
+            amount: number;
+            formatted: string;
+        };
+        month: {
+            amount: number;
+            formatted: string;
+        };
+    };
+    order_status_summary: {
+        pending: number;
+        in_progress: number;
+        ready: number;
+        total_today: number;
+    };
+}
+
+export interface DashboardResponse {
+    success: boolean;
+    data: DashboardData;
+    meta: {
+        date: string;
+        month: string;
+        timezone: string;
+    };
+}
+
+// RecentOrder has the same structure as Order but we keep it as a type alias for clarity
+export type RecentOrder = Order;
+
+export interface RecentOrdersResponse {
+    success: boolean;
+    data: RecentOrder[];
+}
+
 export interface Category {
     id: number,
     name: string,

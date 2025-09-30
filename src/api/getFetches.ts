@@ -1,5 +1,5 @@
 import instance from '../lib/axios';
-import type { UserWithPermissions, Role, Permission, PaginatedClientsResponse, PaginatedClientRequest, PaginatedOrdersResponse, PaginatedOrderRequest, Category, Subcategory, Client } from '../types/api';
+import type { UserWithPermissions, Role, Permission, PaginatedClientsResponse, PaginatedClientRequest, PaginatedOrdersResponse, PaginatedOrderRequest, Category, Subcategory, Client, DashboardResponse, RecentOrdersResponse } from '../types/api';
 
 /**
  * Auth related GET API calls
@@ -68,5 +68,19 @@ export const getSubcategoriesList = (categoryId?: number): Promise<Subcategory[]
 
 export const getOrdersPaginated = (params: PaginatedOrderRequest): Promise<PaginatedOrdersResponse> => {
     return instance.get('/orders/paginated', { params })
+        .then((response) => response.data);
+}
+
+/**
+ * Dashboard related GET API calls
+ */
+
+export const getDashboardData = (): Promise<DashboardResponse> => {
+    return instance.get('/dashboard')
+        .then((response) => response.data);
+}
+
+export const getRecentOrders = (): Promise<RecentOrdersResponse> => {
+    return instance.get('/orders/recent')
         .then((response) => response.data);
 }

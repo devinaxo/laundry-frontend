@@ -19,7 +19,6 @@ interface EditOrderModalProps {
 export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated }: EditOrderModalProps) {
     const [formData, setFormData] = useState({
         status: '',
-        estimated_delivery_date: '',
         actual_delivery_date: '',
         notes: '',
     });
@@ -43,7 +42,6 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
             console.log(order)
             setFormData({
                 status: order.status || '',
-                estimated_delivery_date: formatDateForInput(order.estimated_delivery_date),
                 actual_delivery_date: formatDateForInput(order.actual_delivery_date),
                 notes: order.notes || '',
             });
@@ -64,7 +62,6 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
         try {
             await updateOrder(order.id, {
                 status: formData.status as 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled',
-                estimated_delivery_date: formData.estimated_delivery_date || undefined,
                 actual_delivery_date: formData.actual_delivery_date || undefined,
                 notes: formData.notes || undefined,
             });
@@ -107,16 +104,6 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                                 <SelectItem value="cancelled">Cancelado</SelectItem>
                             </SelectContent>
                         </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="estimated_delivery_date">Fecha Estimada de Entrega</Label>
-                        <Input
-                            type="date"
-                            id="estimated_delivery_date"
-                            value={formData.estimated_delivery_date}
-                            onChange={(e) => setFormData({ ...formData, estimated_delivery_date: e.target.value })}
-                        />
                     </div>
 
                     {formData.status === 'delivered' && (

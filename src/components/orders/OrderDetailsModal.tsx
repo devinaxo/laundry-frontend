@@ -2,18 +2,61 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Order } from '@/types/api';
-import { Calendar, DollarSign, FileText, Package, User, Phone, MapPin } from 'lucide-react';
+import { Calendar, FileText, Package, User, Phone, MapPin, Edit3 } from 'lucide-react';
 import { statusColors, statusLabels } from './statuses';
+import { updateOrderStatus } from '@/api/patchFetches';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 interface OrderDetailsModalProps {
     order: Order | null;
     isOpen: boolean;
     onClose: () => void;
+    showStatusEdit?: boolean;
+    onStatusUpdate?: (updatedOrder: Order) => void;
 }
 
-export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetailsModalProps) {
+export default function OrderDetailsModal({
+    order,
+    isOpen,
+    onClose,
+    showStatusEdit = false,
+    onStatusUpdate
+}: OrderDetailsModalProps) {
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
     if (!order) return null;
+
+    const handleStatusChange = async (newStatus: string) => {
+        if (!order || newStatus === order.status) return;
+
+        const validStatuses = ['pending', 'in_progress', 'ready', 'delivered', 'cancelled'] as const;
+        type OrderStatus = typeof validStatuses[number];
+
+        if (!validStatuses.includes(newStatus as OrderStatus)) {
+            toast.error('Estado de pedido inválido');
+            return;
+        }
+
+        try {
+            setIsUpdatingStatus(true);
+            const response = await updateOrderStatus(order.id, newStatus as OrderStatus);
+
+            if (response.success) {
+                toast.success('Estado del pedido actualizado exitosamente');
+                onStatusUpdate?.(response.data);
+            } else {
+                toast.error('Error al actualizar el estado del pedido');
+            }
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            toast.error('Error al actualizar el estado del pedido');
+        } finally {
+            setIsUpdatingStatus(false);
+        }
+    };
 
     const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
     const totalAmount = parseFloat(order.total);
@@ -24,9 +67,56 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between pr-4">
                         <span>Detalles del Pedido #{order.order_number}</span>
-                        <Badge className={statusColors[order.status]}>
-                            {statusLabels[order.status]}
-                        </Badge>
+                        {showStatusEdit ? (
+                            <div className="flex items-center gap-3">
+                                <Select
+                                    value={order.status}
+                                    onValueChange={handleStatusChange}
+                                    disabled={isUpdatingStatus}
+                                >
+                                    <SelectTrigger className="w-40">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="pending">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-gray-500"></div>
+                                                Pendiente
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="in_progress">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                                En Proceso
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="ready">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                                Listo
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="delivered">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                                Entregado
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="cancelled">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                                Cancelado
+                                            </div>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Edit3 className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                        ) : (
+                            <Badge className={statusColors[order.status]}>
+                                {statusLabels[order.status]}
+                            </Badge>
+                        )}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -55,9 +145,17 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                                         </a>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                                    <MapPin className="h-4 w-4 mt-0.5" />
-                                    <span>{order.client.address}</span>
+                                <div className="flex items-start gap-2 text-sm">
+                                    <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                                    <a
+                                        href={`https://www.google.com/maps?q=${order.client.latitude},${order.client.longitude}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-700 transition-colors duration-200 hover:underline"
+                                        title="Ver ubicación en Google Maps"
+                                    >
+                                        {order.client.address}
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -82,46 +180,20 @@ export default function OrderDetailsModal({ order, isOpen, onClose }: OrderDetai
                                         })}
                                     </div>
                                 </div>
-                                
+
                                 <div className="bg-muted/50 rounded-lg p-3">
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                                         <Calendar className="h-4 w-4" />
-                                        Fecha Estimada
+                                        Fecha de Entrega
                                     </div>
                                     <div className="font-medium text-foreground">
-                                        {order.estimated_delivery_date ? 
-                                            new Date(order.estimated_delivery_date).toLocaleDateString('es-ES', {
+                                        {order.actual_delivery_date ?
+                                            new Date(order.actual_delivery_date).toLocaleDateString('es-ES', {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric',
-                                            }) : 'Sin fecha estimada'
+                                            }) : '-'
                                         }
-                                    </div>
-                                </div>
-
-                                {order.actual_delivery_date && (
-                                    <div className="bg-muted/50 rounded-lg p-3">
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                            <Calendar className="h-4 w-4" />
-                                            Fecha Real de Entrega
-                                        </div>
-                                        <div className="font-medium text-foreground">
-                                            {new Date(order.actual_delivery_date).toLocaleDateString('es-ES', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric',
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="bg-muted/50 rounded-lg p-3">
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                        <DollarSign className="h-4 w-4" />
-                                        Total del Pedido
-                                    </div>
-                                    <div className="font-bold text-lg text-foreground">
-                                        ${totalAmount.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                                     </div>
                                 </div>
                             </div>
