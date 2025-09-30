@@ -32,6 +32,7 @@ import {
 import { ArrowUpDown, Edit, MoreVertical, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import EditSubcategoryModal from '@/components/subcategories/EditSubcategoryModal';
+import { formatDateTime } from '@/lib/utils';
 
 const columnHelper = createColumnHelper<Subcategory>();
 
@@ -205,13 +206,7 @@ export default function SubcategoriesList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,

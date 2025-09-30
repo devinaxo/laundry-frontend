@@ -35,6 +35,7 @@ import EditUserModal from '@/components/users/EditUserModal';
 import { toast } from 'sonner';
 import { useHasPermission } from '@/hooks/useHasPermission';
 import { Permission } from '@/config/routes';
+import { formatDateTime } from '@/lib/utils';
 
 const columnHelper = createColumnHelper<UserWithPermissions>();
 
@@ -261,13 +262,7 @@ export default function UsersList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,

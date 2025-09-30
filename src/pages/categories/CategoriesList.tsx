@@ -32,6 +32,7 @@ import {
 import { ArrowUpDown, Edit, MoreVertical, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import EditCategoryModal from '@/components/categories/EditCategoryModal';
+import { formatDateTime } from '@/lib/utils';
 
 const columnHelper = createColumnHelper<Category>();
 
@@ -171,13 +172,7 @@ export default function CategoriesList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,
@@ -195,13 +190,7 @@ export default function CategoriesList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,

@@ -36,6 +36,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ClientMapModal from '@/components/clients/ClientMapModal';
 import EditClientModal from '@/components/clients/EditClientModal';
+import { formatDateTime } from '@/lib/utils';
 
 const columnHelper = createColumnHelper<Client>();
 
@@ -254,13 +255,7 @@ export default function ClientsList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,
@@ -278,13 +273,7 @@ export default function ClientsList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,
