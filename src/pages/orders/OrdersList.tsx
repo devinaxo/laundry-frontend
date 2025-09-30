@@ -52,6 +52,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { statusColors, statusLabels } from '@/components/orders/statuses';
+import { formatDateOnly, formatDateTime } from '@/lib/utils';
 
 const columnHelper = createColumnHelper<Order>();
 
@@ -352,24 +353,20 @@ export default function OrdersList() {
                 <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm text-foreground">
-                        {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                        })}
+                        {formatDateOnly(info.getValue())}
                     </span>
                 </div>
             ),
             size: 160,
         }),
-        columnHelper.accessor('estimated_delivery_date', {
+        columnHelper.accessor('actual_delivery_date', {
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
                 >
-                    Fecha Estimada
+                    Fecha de Entrega
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -379,11 +376,7 @@ export default function OrdersList() {
                     <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm text-foreground">
-                            {date ? new Date(date).toLocaleDateString('es-ES', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                            }) : 'Sin fecha'}
+                            {date ? formatDateOnly(date) : '-'}
                         </span>
                     </div>
                 );
@@ -421,13 +414,7 @@ export default function OrdersList() {
             ),
             cell: (info) => (
                 <span className="text-sm text-muted-foreground">
-                    {new Date(info.getValue()).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}
+                    {formatDateTime(info.getValue())}
                 </span>
             ),
             size: 160,
