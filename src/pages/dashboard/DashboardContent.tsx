@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
                                     <CardTitle>Pedidos Recientes</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-3">
+                                    <div className="space-y-3 max-h-64 overflow-y-auto">
                                         {recentOrders.length > 0 ? (
                                             recentOrders.map((order) => (
                                                 <div 
