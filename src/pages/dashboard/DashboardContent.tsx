@@ -165,18 +165,18 @@ const Dashboard: React.FC = () => {
                                     <CardTitle>Pedidos Recientes</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-3">
+                                    <div className="space-y-3 max-h-64 overflow-y-auto">
                                         {recentOrders.length > 0 ? (
                                             recentOrders.map((order) => (
                                                 <div 
                                                     key={order.id} 
-                                                    className="flex items-center justify-between p-3 bg-muted rounded cursor-pointer hover:bg-muted/80 transition-colors"
+                                                    className="flex items-center justify-between p-3 bg-accent/80 rounded cursor-pointer hover:bg-accent/60 transition-colors"
                                                     onClick={() => handleViewOrderDetails(order)}
                                                     title="Hacer clic para ver detalles"
                                                 >
                                                     <div>
                                                         <p className="font-medium">{order.order_number}</p>
-                                                        <p className="text-sm text-muted-foreground">
+                                                        <p className="text-sm text-accent-foreground">
                                                             {order.client.forename} {order.client.surname}
                                                         </p>
                                                         <p className="text-sm font-medium text-green-600">
@@ -189,7 +189,7 @@ const Dashboard: React.FC = () => {
                                                 </div>
                                             ))
                                         ) : (
-                                            <div className="text-center text-muted-foreground py-4">
+                                            <div className="text-center text-accent-foreground py-4">
                                                 No hay pedidos recientes
                                             </div>
                                         )}
