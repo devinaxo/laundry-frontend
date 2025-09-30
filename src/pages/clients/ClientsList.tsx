@@ -2,6 +2,7 @@ import { deleteClient } from '@/api/deleteFetches';
 import { getClientsPaginated } from '@/api/getFetches';
 import { restoreClient } from '@/api/patchFetches';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,8 +19,10 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import ViewModeToggle from '@/components/ui/ViewModeToggle';
 import { Permission } from '@/config/routes';
 import { useHasPermission } from '@/hooks/useHasPermission';
+import { useViewPreference } from '@/hooks/useViewPreference';
 import type { Client, PaginatedClientsResponse } from '@/types/api';
 import {
     createColumnHelper,
@@ -31,7 +34,7 @@ import {
     type ColumnFiltersState,
     type SortingState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronLeft, ChevronRight, Edit, MapPin, MoreVertical, Search, UserCheck, UserX } from 'lucide-react';
+import { ArrowUpDown, ChevronLeft, ChevronRight, Edit, MapPin, MoreVertical, Search, UserCheck, UserX, Phone, Calendar, User } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ClientMapModal from '@/components/clients/ClientMapModal';
@@ -121,6 +124,7 @@ export default function ClientsList() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [globalFilter, setGlobalFilter] = useState('');
+    const [viewMode, setViewMode] = useViewPreference('clients', 'table');
     
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -134,6 +138,11 @@ export default function ClientsList() {
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isMapModalOpen, setIsMapModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const handleWhatsAppClick = (phoneNumber: string) => {
+        const cleanedNumber = phoneNumber.replace(/\D/g, '');
+        window.open(`https://wa.me/${cleanedNumber}`, '_blank');
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -437,7 +446,12 @@ export default function ClientsList() {
                         Gestiona los clientes del sistema
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
+                    <ViewModeToggle 
+                        viewMode={viewMode} 
+                        onViewModeChange={setViewMode} 
+                    />
+                    
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -450,65 +464,163 @@ export default function ClientsList() {
                 </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-border">
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-48">
-                                    <div className="flex items-center justify-center">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">Cargando clientes...</span>
-                                            <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
-                                        </div>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && 'selected'}
-                                    className="border-b border-border transition-colors"
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="py-3">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
+            {viewMode === 'table' ? (
+                <div className="rounded-lg border border-border bg-card">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id} className="border-b border-border">
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <p className="text-muted-foreground">No se encontraron clientes</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {debouncedSearch ? 'Intenta ajustar tu búsqueda' : 'No hay clientes registrados'}
-                                        </p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-48">
+                                        <div className="flex items-center justify-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-muted-foreground">Cargando clientes...</span>
+                                                <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && 'selected'}
+                                        className="border-b border-border transition-colors"
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id} className="py-3">
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <p className="text-muted-foreground">No se encontraron clientes</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {debouncedSearch ? 'Intenta ajustar tu búsqueda' : 'No hay clientes registrados'}
+                                            </p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">Cargando clientes...</span>
+                                <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
+                            </div>
+                        </div>
+                    ) : clients.length > 0 ? (
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {clients.map((client) => (
+                                <Card key={client.id} className="transition-shadow hover:shadow-md">
+                                    <CardHeader className="pb-3">
+                                        <div className="flex items-start justify-between">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <User className="h-4 w-4 text-muted-foreground" />
+                                                    <h3 className="font-semibold text-foreground">
+                                                        {client.forename} {client.surname}
+                                                    </h3>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Código: {client.id}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                                                        client.active
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                                    }`}
+                                                >
+                                                    {client.active ? 'Activo' : 'Inactivo'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <button
+                                                    onClick={() => handleWhatsAppClick(client.phone)}
+                                                    className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+                                                    title="Enviar mensaje por WhatsApp"
+                                                >
+                                                    <Phone className="h-4 w-4" />
+                                                    <span>{client.phone}</span>
+                                                </button>
+                                            </div>
+                                            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                                <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
+                                                <span className="break-words">{client.address}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between pt-2 border-t border-border">
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                <Calendar className="h-3 w-3" />
+                                                <span>{formatDateTime(client.created_at)}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleShowMap(client)}
+                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-950 h-8 w-8 p-0"
+                                                    title="Ver en mapa"
+                                                >
+                                                    <MapPin className="h-4 w-4" />
+                                                </Button>
+                                                {canEdit && (
+                                                    <ClientActions
+                                                        client={client}
+                                                        onEditClient={handleEditClient}
+                                                        onRefreshClients={refreshClients}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <div className="text-center space-y-2">
+                                <p className="text-muted-foreground">No se encontraron clientes</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {debouncedSearch ? 'Intenta ajustar tu búsqueda' : 'No hay clientes registrados'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {!isLoading && clients.length > 0 && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">

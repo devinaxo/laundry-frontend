@@ -1,6 +1,7 @@
 import { getOrdersPaginated } from '@/api/getFetches';
 import { updateOrderStatus } from '@/api/patchFetches';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,8 +19,10 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import ViewModeToggle from '@/components/ui/ViewModeToggle';
 import { Permission } from '@/config/routes';
 import { useHasPermission } from '@/hooks/useHasPermission';
+import { useViewPreference } from '@/hooks/useViewPreference';
 import type { Order, PaginatedOrdersResponse } from '@/types/api';
 import EditOrderModal from '@/components/orders/EditOrderModal';
 import ClientMapModal from '@/components/clients/ClientMapModal';
@@ -47,7 +50,10 @@ import {
     Check,
     Phone,
     MapPin,
-    Eye
+    Eye,
+    User,
+    Clock,
+    MessageCircleReply
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -62,17 +68,18 @@ interface OrderActionsProps {
     onMarkAsDelivered: (order: Order) => Promise<void>;
     onViewDetails: (order: Order) => void;
     isMarkingAsDelivered?: boolean;
+    viewMode: 'table' | 'cards';
 }
 
-function OrderActions({ order, onEditOrder, onMarkAsDelivered, onViewDetails, isMarkingAsDelivered = false }: OrderActionsProps) {
+function OrderActions({ order, onEditOrder, onMarkAsDelivered, onViewDetails, isMarkingAsDelivered = false, viewMode }: OrderActionsProps) {
     const [isOpen, setIsOpen] = useState(false);
-    
+
     const handleMarkAsDelivered = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
         await onMarkAsDelivered(order);
     };
-    
+
     return (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
             <DropdownMenuTrigger asChild>
@@ -85,16 +92,18 @@ function OrderActions({ order, onEditOrder, onMarkAsDelivered, onViewDetails, is
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover border-border">
-                <DropdownMenuItem
-                    onClick={() => {
-                        onViewDetails(order);
-                        setIsOpen(false);
-                    }}
-                    className="cursor-pointer hover:bg-accent focus:bg-accent"
-                >
-                    <Eye className="mr-2 h-4 w-4" />
-                    <span>Ver detalles</span>
-                </DropdownMenuItem>
+                {viewMode === 'table' && (
+                    <DropdownMenuItem
+                        onClick={() => {
+                            onViewDetails(order);
+                            setIsOpen(false);
+                        }}
+                        className="cursor-pointer hover:bg-accent focus:bg-accent"
+                    >
+                        <Eye className="mr-2 h-4 w-4" />
+                        <span>Ver detalles</span>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                     onClick={() => {
                         onEditOrder(order);
@@ -156,13 +165,13 @@ function QuickStatusActions({ order, onStatusUpdate, updatingStatus = null }: Qu
     };
 
     const actions = getAvailableActions(order.status);
-    
+
     if (actions.length === 0) {
         return null;
     }
 
     return (
-        <div className="flex items-center gap-1">
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-1">
             {actions.map((action) => {
                 const isThisButtonUpdating = updatingStatus === action.status;
                 return (
@@ -170,9 +179,8 @@ function QuickStatusActions({ order, onStatusUpdate, updatingStatus = null }: Qu
                         key={action.status}
                         size="sm"
                         variant="ghost"
-                        className={`h-6 px-2 text-xs font-medium rounded-md transition-colors ${
-                            isThisButtonUpdating ? 'opacity-50 cursor-not-allowed' : action.color
-                        }`}
+                        className={`h-8 px-3 text-xs font-medium rounded-md transition-colors touch-manipulation ${isThisButtonUpdating ? 'opacity-50 cursor-not-allowed' : action.color
+                            } sm:h-6 sm:px-2`}
                         onClick={() => onStatusUpdate(order, action.status)}
                         disabled={updatingStatus !== null}
                         title={`Cambiar estado a ${action.label}`}
@@ -196,6 +204,7 @@ export default function OrdersList() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [globalFilter, setGlobalFilter] = useState('');
+    const [viewMode, setViewMode] = useViewPreference('orders', 'table');
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
@@ -307,7 +316,7 @@ export default function OrdersList() {
                         >
                             {statusLabels[status]}
                         </span>
-                        <QuickStatusActions 
+                        <QuickStatusActions
                             order={info.row.original}
                             onStatusUpdate={handleQuickStatusUpdate}
                             updatingStatus={updatingStatusData?.orderId === info.row.original.id ? updatingStatusData.status : null}
@@ -431,6 +440,7 @@ export default function OrdersList() {
                             onMarkAsDelivered={handleMarkAsDelivered}
                             onViewDetails={handleViewDetails}
                             isMarkingAsDelivered={markingAsDeliveredOrderId === row.original.id}
+                            viewMode={viewMode}
                         />
                     ),
                     size: 80,
@@ -583,9 +593,11 @@ export default function OrdersList() {
                         Gestiona los pedidos del sistema
                     </p>
                 </div>
+                <ViewModeToggle 
+                    viewMode={viewMode} 
+                    onViewModeChange={setViewMode} 
+                />
             </div>
-
-            {/* Filters */}
             <div className="flex flex-wrap items-center gap-4 p-4 bg-card border border-border rounded-lg">
                 <div className="relative flex-1 min-w-64">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -617,7 +629,7 @@ export default function OrdersList() {
                         placeholder="Desde"
                         value={dateFromFilter}
                         onChange={(e) => setDateFromFilter(e.target.value)}
-                        className="w-40"
+                        className="w-26"
                     />
                     <span className="text-muted-foreground">hasta</span>
                     <Input
@@ -625,7 +637,7 @@ export default function OrdersList() {
                         placeholder="Hasta"
                         value={dateToFilter}
                         onChange={(e) => setDateToFilter(e.target.value)}
-                        className="w-40"
+                        className="w-26"
                     />
                 </div>
 
@@ -644,67 +656,202 @@ export default function OrdersList() {
                 )}
             </div>
 
-            <div className="rounded-lg border border-border bg-card">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-border">
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-48">
-                                    <div className="flex items-center justify-center">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">Cargando pedidos...</span>
-                                            <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
-                                        </div>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && 'selected'}
-                                    className="border-b border-border transition-colors"
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="py-3">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
+            {viewMode === 'table' ? (
+                <div className="rounded-lg border border-border bg-card">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id} className="border-b border-border">
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <p className="text-muted-foreground">No se encontraron pedidos</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {debouncedSearch || (statusFilter && statusFilter !== 'all') || dateFromFilter || dateToFilter
-                                                ? 'Intenta ajustar tus filtros'
-                                                : 'No hay pedidos registrados'}
-                                        </p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-48">
+                                        <div className="flex items-center justify-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-muted-foreground">Cargando pedidos...</span>
+                                                <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && 'selected'}
+                                        className="border-b border-border transition-colors"
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id} className="py-3">
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <p className="text-muted-foreground">No se encontraron pedidos</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {debouncedSearch || (statusFilter && statusFilter !== 'all') || dateFromFilter || dateToFilter
+                                                    ? 'Intenta ajustar tus filtros'
+                                                    : 'No hay pedidos registrados'}
+                                            </p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">Cargando pedidos...</span>
+                                <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
+                            </div>
+                        </div>
+                    ) : orders.length > 0 ? (
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {orders.map((order) => {
+                                const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                                return (
+                                    <Card key={order.id} className="transition-shadow hover:shadow-md">
+                                        <CardHeader className="pb-3">
+                                            <div className="flex items-start justify-between">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <Package className="h-4 w-4 text-muted-foreground" />
+                                                        <h3 className="font-mono text-sm font-bold text-foreground">
+                                                            {order.order_number}
+                                                        </h3>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                                        <User className="h-3 w-3" />
+                                                        <span>{order.client.forename} {order.client.surname} ({order.client.phone})</span>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${statusColors[order.status]}`}
+                                                >
+                                                    {statusLabels[order.status]}
+                                                </span>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div className="grid grid-cols-2 gap-3 text-sm">
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                                        <span className="font-medium">
+                                                            ${parseFloat(order.total).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Package className="h-4 w-4 text-muted-foreground" />
+                                                        <span>{totalItems} artículo{totalItems !== 1 ? 's' : ''}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                        <Calendar className="h-3 w-3" />
+                                                        <span>Recep.: {formatDateOnly(order.reception_date)}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>Entrega: {order.actual_delivery_date ? formatDateOnly(order.actual_delivery_date) : '-'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <QuickStatusActions
+                                                    order={order}
+                                                    onStatusUpdate={handleQuickStatusUpdate}
+                                                    updatingStatus={updatingStatusData?.orderId === order.id ? updatingStatusData.status : null}
+                                                />
+                                            </div>
+
+                                            <div className="flex items-center justify-between pt-2 border-t border-border">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                    <Calendar className="h-3 w-3" />
+                                                    <span>Creado: {formatDateTime(order.created_at)}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleWhatsAppClick(order.client.phone)}
+                                                        className="h-8 w-8 p-0"
+                                                        title="Mandar mensaje en WhatsApp"
+                                                    >
+                                                        <MessageCircleReply className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleShowClientMap(order.client)}
+                                                        className="h-8 w-8 p-0"
+                                                        title="Ver mapa del cliente"
+                                                    >
+                                                        <MapPin className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleViewDetails(order)}
+                                                        className="h-8 w-8 p-0"
+                                                        title="Ver detalles"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                    {canEdit && (
+                                                        <OrderActions
+                                                            order={order}
+                                                            onEditOrder={handleEditOrder}
+                                                            onMarkAsDelivered={handleMarkAsDelivered}
+                                                            onViewDetails={handleViewDetails}
+                                                            isMarkingAsDelivered={markingAsDeliveredOrderId === order.id}
+                                                            viewMode={viewMode}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <div className="text-center space-y-2">
+                                <p className="text-muted-foreground">No se encontraron pedidos</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {debouncedSearch || (statusFilter && statusFilter !== 'all') || dateFromFilter || dateToFilter
+                                        ? 'Intenta ajustar tus filtros'
+                                        : 'No hay pedidos registrados'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {!isLoading && orders.length > 0 && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -760,20 +907,20 @@ export default function OrdersList() {
                     </Button>
                 </div>
             )}
-            
+
             <EditOrderModal
                 order={selectedOrder}
                 isOpen={editModalOpen}
                 onClose={() => setEditModalOpen(false)}
                 onOrderUpdated={handleOrderUpdated}
             />
-            
+
             <OrderDetailsModal
                 order={selectedOrderForDetails}
                 isOpen={orderDetailsModalOpen}
                 onClose={() => setOrderDetailsModalOpen(false)}
             />
-            
+
             <ClientMapModal
                 client={selectedClient}
                 isOpen={clientMapModalOpen}
