@@ -264,8 +264,11 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                                         className="w-full justify-between"
                                         disabled={isLoading || loadingClients}
                                     >
-                                        {formData.client_id
-                                            ? clients.find((client) => client.id.toString() === formData.client_id)?.forename + ' ' + clients.find((client) => client.id.toString() === formData.client_id)?.surname
+                                        {formData.client_id && !loadingClients
+                                            ? (() => {
+                                                const client = clients.find((client) => client.id.toString() === formData.client_id);
+                                                return client ? `${client.forename} ${client.surname}` : "Cliente no encontrado";
+                                            })()
                                             : (loadingClients ? "Cargando clientes..." : "Selecciona un cliente")}
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
@@ -400,8 +403,11 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                                                         className="w-full justify-between"
                                                         disabled={isLoading || loadingSubcategories}
                                                     >
-                                                        {item.subcategory_id
-                                                            ? subcategories.find((sub) => sub.id.toString() === item.subcategory_id)?.category.name + ' - ' + subcategories.find((sub) => sub.id.toString() === item.subcategory_id)?.name
+                                                        {item.subcategory_id && !loadingSubcategories
+                                                            ? (() => {
+                                                                const subcategory = subcategories.find((sub) => sub.id.toString() === item.subcategory_id);
+                                                                return subcategory ? `${subcategory.category.name} - ${subcategory.name}` : "Tipo no encontrado";
+                                                            })()
                                                             : (loadingSubcategories ? "Cargando..." : "Seleccione tipo")}
                                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                     </Button>
