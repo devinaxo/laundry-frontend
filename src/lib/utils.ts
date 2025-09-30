@@ -6,9 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const formatDateOnly = (dateString: string) => {
-	const [year, month, day] = dateString.split('T')[0].split('-');
-	const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-	return date.toLocaleDateString('es-ES', {
+	return new Date(dateString).toLocaleDateString('es-ES', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
