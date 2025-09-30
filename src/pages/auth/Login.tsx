@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,12 +10,9 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const { login, isLoading, isAuthenticated } = useAuth();
-    const location = useLocation();
-
-    const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
     if (isAuthenticated) {
-        return <Navigate to={from} replace />;
+        window.location.href = '/';
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
