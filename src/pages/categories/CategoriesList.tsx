@@ -16,8 +16,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import ViewModeToggle from '@/components/ui/ViewModeToggle';
 import { Permission } from '@/config/routes';
 import { useHasPermission } from '@/hooks/useHasPermission';
+import { useViewPreference } from '@/hooks/useViewPreference';
 import type { Category } from '@/types/api';
 import {
     createColumnHelper,
@@ -29,7 +32,7 @@ import {
     type ColumnFiltersState,
     type SortingState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, Edit, MoreVertical, Search } from 'lucide-react';
+import { ArrowUpDown, Edit, MoreVertical, Search, Tag, Calendar, FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import EditCategoryModal from '@/components/categories/EditCategoryModal';
 import { formatDateTime } from '@/lib/utils';
@@ -74,6 +77,7 @@ export default function CategoriesList() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [globalFilter, setGlobalFilter] = useState('');
+    const [viewMode, setViewMode] = useViewPreference('categories', 'table');
 
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -298,7 +302,11 @@ export default function CategoriesList() {
                         Gestiona las categorías del sistema
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
+                    <ViewModeToggle 
+                        viewMode={viewMode} 
+                        onViewModeChange={setViewMode} 
+                    />
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
@@ -311,65 +319,142 @@ export default function CategoriesList() {
                 </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-border">
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-48">
-                                    <div className="flex items-center justify-center">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-muted-foreground">Cargando categorías...</span>
-                                            <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
-                                        </div>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && 'selected'}
-                                    className="border-b border-border transition-colors"
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="py-3">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
+            {viewMode === 'table' ? (
+                <div className="rounded-lg border border-border bg-card">
+                    <Table>
+                        <TableHeader>
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <TableRow key={headerGroup.id} className="border-b border-border">
+                                    {headerGroup.headers.map((header) => (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
                                     ))}
                                 </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <p className="text-muted-foreground">No se encontraron categorías</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay categorías registradas'}
-                                        </p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+                            ))}
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-48">
+                                        <div className="flex items-center justify-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-muted-foreground">Cargando categorías...</span>
+                                                <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ) : table.getRowModel().rows?.length ? (
+                                table.getRowModel().rows.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && 'selected'}
+                                        className="border-b border-border transition-colors"
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id} className="py-3">
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <p className="text-muted-foreground">No se encontraron categorías</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay categorías registradas'}
+                                            </p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-12">
+                            <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">Cargando categorías...</span>
+                                <Spinner variant="ellipsis" className="h-6 w-6 text-primary" />
+                            </div>
+                        </div>
+                    ) : table.getFilteredRowModel().rows?.length ? (
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {table.getFilteredRowModel().rows.map((row) => {
+                                const category = row.original;
+                                return (
+                                    <Card key={category.id} className="transition-shadow hover:shadow-md">
+                                        <CardHeader className="pb-3">
+                                            <div className="flex items-start justify-between">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <Tag className="h-4 w-4 text-muted-foreground" />
+                                                        <h3 className="font-mono font-medium text-muted-foreground">
+                                                            {category.name.toUpperCase()}
+                                                        </h3>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                        <span>ID: {category.id}</span>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                                                        category.active
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                            : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                                    }`}
+                                                >
+                                                    {category.active ? 'Activo' : 'Inactivo'}
+                                                </span>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div className="space-y-2">
+                                                <div className="flex items-start gap-2">
+                                                    <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
+                                                    <span className="text-sm text-muted-foreground">{category.description}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-between pt-2 border-t border-border">
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                    <Calendar className="h-3 w-3" />
+                                                    <span>Creado: {formatDateTime(category.created_at)}</span>
+                                                </div>
+                                                {canEdit && (
+                                                    <UserActions
+                                                        category={category}
+                                                        onEditCategory={handleEditCategory}
+                                                    />
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <div className="text-center space-y-2">
+                                <p className="text-muted-foreground">No se encontraron categorías</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {globalFilter ? 'Intenta ajustar tu búsqueda' : 'No hay categorías registradas'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {!isLoading && categories.length > 0 && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
