@@ -207,6 +207,20 @@ export interface CreateOrderRequest {
     }[];
 }
 
+export interface ReplaceOrderRequest {
+    client_id: number;
+    reception_date: string;
+    estimated_delivery_date?: string;
+    status?: 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled';
+    actual_delivery_date?: string;
+    notes?: string;
+    items: {
+        subcategory_id: number;
+        quantity: number;
+        notes?: string;
+    }[];
+}
+
 export interface UpdateClientRequest {
     forename?: string;
     surname?: string;
