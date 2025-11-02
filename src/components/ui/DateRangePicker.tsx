@@ -75,11 +75,6 @@ const getPresetRange = (preset: PresetRange): DateRange | undefined => {
     }
 };
 
-export interface DateRangePickerProps {
-    date?: DateRange;
-    onDateChange?: (date: DateRange | undefined) => void;
-    className?: string;
-}
 
 export function DateRangePicker({
     date,
