@@ -158,6 +158,7 @@ const OverviewDataSection: React.FC<OverviewDataSectionProps> = ({ dateRange }) 
                     <ZoomableChart 
                         data={chartDataOrders} 
                         title="Pedidos Diarios"
+                        bottomLabel="Pedidos"
                         description="Cantidad de pedidos por día en el período seleccionado"
                         valueLabel="Total Pedidos"
                     />
@@ -168,6 +169,7 @@ const OverviewDataSection: React.FC<OverviewDataSectionProps> = ({ dateRange }) 
                     <ZoomableChart 
                         data={chartDataRevenue} 
                         title="Ingresos Diarios"
+                        bottomLabel="Ingresos"
                         description="Ingresos generados por día en el período seleccionado"
                         valueLabel="Total Ingresos"
                         formatValue={(value) => `$${value.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
