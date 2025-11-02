@@ -300,3 +300,181 @@ export interface PaginatedOrderRequest {
 
 export type PaginatedClientsResponse = PaginatedResponse<Client>;
 export type PaginatedOrdersResponse = PaginatedResponse<Order>;
+
+// Analytics interfaces
+export interface OverviewMetrics {
+    period: {
+        start_date: string | null;
+        end_date: string | null;
+    };
+    metrics: {
+        total_orders: number;
+        total_revenue: string;
+        average_order_value: string;
+        unique_clients: number;
+        highest_order: string;
+        lowest_order: string;
+    };
+    growth: {
+        orders_growth_percentage: number | null;
+        revenue_growth_percentage: number | null;
+    };
+}
+
+export interface MonthlyStats {
+    period: {
+        year: number;
+        month: number;
+        month_name: string;
+        start_date: string;
+        end_date: string;
+    };
+    stats: {
+        total_orders: number;
+        total_revenue: string;
+        average_order_value: string;
+        unique_clients: number;
+    };
+    status_breakdown: Array<{
+        status: string;
+        count: number;
+    }>;
+}
+
+export interface OrdersPerMonth {
+    year: number;
+    data: Array<{
+        month: number;
+        month_name: string;
+        month_short: string;
+        total_orders: number;
+        total_revenue: string;
+        average_order_value: string;
+    }>;
+}
+
+export interface YearlyComparison {
+    years: number[];
+    comparison: Array<{
+        year: number;
+        total_orders: number;
+        total_revenue: string;
+        average_order_value: string;
+    }>;
+    growth?: {
+        orders_growth_percentage: number;
+        revenue_growth_percentage: number;
+        average_value_growth_percentage: number;
+        from_year: string;
+        to_year: string;
+    };
+}
+
+export interface DailyStats {
+    period: {
+        start_date: string;
+        end_date: string;
+        total_days: number;
+    };
+    daily_data: Array<{
+        date: string;
+        day_name: string;
+        total_orders: number;
+        total_revenue: string;
+        average_order_value: string;
+    }>;
+}
+
+export interface TopClient {
+    rank: number;
+    client_id: number;
+    client_name: string;
+    phone: string;
+    total_orders: number;
+    total_spent: string;
+    average_order_value: string;
+    last_order_date: string;
+}
+
+export interface TopClientsResponse {
+    limit: number;
+    period: {
+        start_date: string | null;
+        end_date: string | null;
+    };
+    top_clients: TopClient[];
+}
+
+export interface FrequentClient {
+    rank: number;
+    client_id: number;
+    client_name: string;
+    phone: string;
+    total_orders: number;
+    total_spent: string;
+    first_order_date: string;
+    last_order_date: string;
+    customer_since_days: number;
+}
+
+export interface FrequentClientsResponse {
+    limit: number;
+    period: {
+        start_date: string | null;
+        end_date: string | null;
+    };
+    frequent_clients: FrequentClient[];
+}
+
+export interface PopularService {
+    rank: number;
+    service_id: number;
+    service_name: string;
+    category_name: string;
+    times_ordered: number;
+    total_quantity: number;
+    total_revenue: string;
+}
+
+export interface PopularServicesResponse {
+    limit: number;
+    period: {
+        start_date: string | null;
+        end_date: string | null;
+    };
+    popular_services: PopularService[];
+}
+
+export interface CategoryRevenue {
+    category_id: number;
+    category_name: string;
+    total_items: number;
+    total_revenue: string;
+    average_item_value: string;
+    percentage: number;
+}
+
+export interface CategoryRevenueResponse {
+    period: {
+        start_date: string | null;
+        end_date: string | null;
+    };
+    total_revenue: string;
+    categories: CategoryRevenue[];
+}
+
+export interface StatusDistribution {
+    status: string;
+    count: number;
+    revenue: string;
+    percentage: number;
+}
+
+export interface StatusDistributionResponse {
+    period: {
+        start_date: string | null;
+        end_date: string | null;
+    };
+    total_orders: number;
+    distribution: StatusDistribution[];
+}

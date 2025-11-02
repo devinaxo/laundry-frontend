@@ -11,8 +11,9 @@ import NewSubcategory from '@/pages/subcategories/NewSubcategory';
 import SubcategoriesList from '@/pages/subcategories/SubcategoriesList';
 import NewUser from '@/pages/users/NewUser';
 import UsersList from '@/pages/users/UsersList';
+import Analytics from '@/pages/analytics/Analytics';
 import type { LucideIcon } from 'lucide-react';
-import { BookPlus, BookUser, ClipboardList, Home, Package, PackagePlus, Plus, UserCog, UserPlus, Users } from 'lucide-react';
+import { BookPlus, BookUser, ClipboardList, Home, Package, PackagePlus, Plus, UserCog, UserPlus, Users, BarChart3 } from 'lucide-react';
 
 // Actual perms
 export const Permission = {
@@ -96,6 +97,24 @@ export const routes: RouteConfig[] = [
         permissions: [Permission.VIEW_DASHBOARD],
     },
     {
+        path: '/analytics',
+        component: Analytics,
+        title: 'Analítica',
+        icon: BarChart3,
+        showInSidebar: true,
+        requiresAuth: true,
+        permissions: [Permission.VIEW_ORDERS],
+    },
+    {
+        path: '/roles/list',
+        component: RolesList,
+        title: 'Roles',
+        icon: UserCog,
+        showInSidebar: true,
+        requiresAuth: true,
+        permissions: [Permission.VIEW_ROLES],
+    },
+    {
         path: '/users',
         title: 'Usuarios',
         icon: Users,
@@ -123,15 +142,6 @@ export const routes: RouteConfig[] = [
                 permissions: [Permission.CREATE_USERS],
             },
         ],
-    },
-    {
-        path: '/roles/list',
-        component: RolesList,
-        title: 'Roles',
-        icon: UserCog,
-        showInSidebar: true,
-        requiresAuth: true,
-        permissions: [Permission.VIEW_ROLES],
     },
     {
         path: '/clients',

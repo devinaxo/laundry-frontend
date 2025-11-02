@@ -1,5 +1,28 @@
 import instance from '../lib/axios';
-import type { UserWithPermissions, Role, Permission, PaginatedClientsResponse, PaginatedClientRequest, PaginatedOrdersResponse, PaginatedOrderRequest, Category, Subcategory, Client, DashboardResponse, RecentOrdersResponse } from '../types/api';
+import type { 
+    UserWithPermissions, 
+    Role, 
+    Permission, 
+    PaginatedClientsResponse, 
+    PaginatedClientRequest, 
+    PaginatedOrdersResponse, 
+    PaginatedOrderRequest, 
+    Category, 
+    Subcategory, 
+    Client, 
+    DashboardResponse, 
+    RecentOrdersResponse,
+    OverviewMetrics,
+    MonthlyStats,
+    OrdersPerMonth,
+    YearlyComparison,
+    DailyStats,
+    TopClientsResponse,
+    FrequentClientsResponse,
+    PopularServicesResponse,
+    CategoryRevenueResponse,
+    StatusDistributionResponse
+} from '../types/api';
 
 /**
  * Auth related GET API calls
@@ -84,3 +107,57 @@ export const getRecentOrders = (): Promise<RecentOrdersResponse> => {
     return instance.get('/orders/recent')
         .then((response) => response.data);
 }
+
+/**
+ * Analytics related GET API calls
+ */
+
+export const getOverview = (params?: { start_date?: string; end_date?: string }): Promise<OverviewMetrics> => {
+    return instance.get('/analytics/overview', { params })
+        .then((response) => response.data);
+};
+
+export const getMonthlyStats = (params?: { year?: number; month?: number }): Promise<MonthlyStats> => {
+    return instance.get('/analytics/monthly-stats', { params })
+        .then((response) => response.data);
+};
+
+export const getOrdersPerMonth = (params?: { year?: number }): Promise<OrdersPerMonth> => {
+    return instance.get('/analytics/orders-per-month', { params })
+        .then((response) => response.data);
+};
+
+export const getYearlyComparison = (params?: { years?: number[] }): Promise<YearlyComparison> => {
+    return instance.get('/analytics/yearly-comparison', { params })
+        .then((response) => response.data);
+};
+
+export const getDailyStats = (params?: { start_date?: string; end_date?: string }): Promise<DailyStats> => {
+    return instance.get('/analytics/daily-stats', { params })
+        .then((response) => response.data);
+};
+
+export const getTopClients = (params?: { limit?: number; start_date?: string; end_date?: string }): Promise<TopClientsResponse> => {
+    return instance.get('/analytics/top-clients', { params })
+        .then((response) => response.data);
+};
+
+export const getFrequentClients = (params?: { limit?: number; start_date?: string; end_date?: string }): Promise<FrequentClientsResponse> => {
+    return instance.get('/analytics/frequent-clients', { params })
+        .then((response) => response.data);
+};
+
+export const getPopularServices = (params?: { limit?: number; start_date?: string; end_date?: string }): Promise<PopularServicesResponse> => {
+    return instance.get('/analytics/popular-services', { params })
+        .then((response) => response.data);
+};
+
+export const getCategoryRevenue = (params?: { start_date?: string; end_date?: string }): Promise<CategoryRevenueResponse> => {
+    return instance.get('/analytics/category-revenue', { params })
+        .then((response) => response.data);
+};
+
+export const getStatusDistribution = (params?: { start_date?: string; end_date?: string }): Promise<StatusDistributionResponse> => {
+    return instance.get('/analytics/status-distribution', { params })
+        .then((response) => response.data);
+};
