@@ -25,18 +25,12 @@ type DataPoint = {
 type ZoomableChartProps = {
     data?: DataPoint[];
     title?: string;
+    bottomLabel?: string;
     description?: string;
     valueLabel?: string;
     formatValue?: (value: number) => string;
     formatYAxis?: (value: number) => string;
 };
-
-const chartConfig = {
-    events: {
-        label: "Events",
-        color: "hsl(var(--chart-1))",
-    },
-} satisfies ChartConfig
 
 const seedRandom = (seed: number) => {
     const x = Math.sin(seed++) * 10000;
@@ -67,6 +61,7 @@ export function simulateData(start = '2024-01-01T00:00:00Z', end = '2024-01-02T0
 export function ZoomableChart({ 
     data: initialData, 
     title = "Zoomable Chart Demo",
+    bottomLabel,
     description,
     valueLabel = "Events",
     formatValue = (value: number) => value.toLocaleString(),
@@ -80,6 +75,13 @@ export function ZoomableChart({
     const [originalData, setOriginalData] = useState<DataPoint[]>(initialData || []);
     const [isSelecting, setIsSelecting] = useState(false);
     const chartRef = useRef<HTMLDivElement>(null);
+
+    const chartConfig = useMemo(() => ({
+        events: {
+            label: bottomLabel || "Eventos",
+            color: "hsl(var(--chart-1))",
+        },
+    } satisfies ChartConfig), [bottomLabel]);
 
     useEffect(() => {
         if (initialData?.length) {
@@ -191,14 +193,14 @@ export function ZoomableChart({
 
     return (
         <Card className="w-full h-full">
-            <CardHeader className="flex-col items-stretch space-y-0 border-b p-0 sm:flex-row hidden sm:flex">
+            <CardHeader className="flex-col items-stretch space-y-0 border-b border-muted p-0 sm:flex-row hidden sm:flex">
                 <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
                     <CardTitle>{title}</CardTitle>
                     {description && <p className="text-sm text-muted-foreground">{description}</p>}
                 </div>
                 <div className="flex">
                     <div
-                        className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l bg-muted/10 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                        className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l border-muted bg-muted/10 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
                     >
                         <span className="text-xs text-muted-foreground">
                             {valueLabel}
