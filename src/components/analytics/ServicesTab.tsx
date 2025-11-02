@@ -121,7 +121,7 @@ const ServicesDataSection: React.FC<ServicesDataSectionProps> = ({ dateRange, li
         );
     }
 
-    const totalRevenue = categoryRevenue.categories.reduce((sum: number, cat: { total_revenue: string }) => sum + parseFloat(cat.total_revenue), 0);
+    const totalRevenue = categoryRevenue.categories.reduce((sum: number, cat) => sum + parseFloat(cat.total_revenue), 0);
     const maxServiceCount = Math.max(...popularServices.popular_services.map(s => s.total_quantity));
 
     return (
