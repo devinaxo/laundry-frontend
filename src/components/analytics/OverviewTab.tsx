@@ -9,8 +9,7 @@ import { statusLabels } from '@/components/orders/statuses';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import type { DateRange } from 'react-day-picker';
 import { format, eachDayOfInterval } from 'date-fns';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { ZoomableChart } from '@/components/ui/zoomableChart';
 
 const OverviewTab: React.FC = () => {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -73,7 +72,7 @@ const OverviewDataSection: React.FC<OverviewDataSectionProps> = ({ dateRange }) 
         loadData();
     }, [loadData]);
 
-    const chartData = React.useMemo(() => {
+    const chartDataOrders = React.useMemo(() => {
         if (!dateRange?.from || !dateRange?.to || !dailyStats) {
             return [];
         }
@@ -91,12 +90,36 @@ const OverviewDataSection: React.FC<OverviewDataSectionProps> = ({ dateRange }) 
             const dateStr = format(date, 'yyyy-MM-dd');
             const existingData = dataMap.get(dateStr);
 
+            // Create date at noon to avoid timezone issues
             return {
-                date: format(date, 'dd MMM'),
-                fullDate: dateStr,
-                orders: existingData ? existingData.total_orders : 0,
-                revenue: existingData ? parseFloat(existingData.total_revenue) : 0,
-                avg: existingData ? parseFloat(existingData.average_order_value) : 0
+                date: `${dateStr}T12:00:00`,
+                events: existingData ? existingData.total_orders : 0
+            };
+        });
+    }, [dateRange, dailyStats]);
+
+    const chartDataRevenue = React.useMemo(() => {
+        if (!dateRange?.from || !dateRange?.to || !dailyStats) {
+            return [];
+        }
+
+        const allDates = eachDayOfInterval({
+            start: dateRange.from,
+            end: dateRange.to
+        });
+
+        const dataMap = new Map(
+            dailyStats.daily_data.map(day => [day.date, day])
+        );
+
+        return allDates.map(date => {
+            const dateStr = format(date, 'yyyy-MM-dd');
+            const existingData = dataMap.get(dateStr);
+
+            // Create date at noon to avoid timezone issues
+            return {
+                date: `${dateStr}T12:00:00`,
+                events: existingData ? Math.round(parseFloat(existingData.total_revenue)) : 0
             };
         });
     }, [dateRange, dailyStats]);
@@ -126,110 +149,35 @@ const OverviewDataSection: React.FC<OverviewDataSectionProps> = ({ dateRange }) 
         );
     }
 
-    const chartConfig = {
-        orders: {
-            label: "Pedidos",
-            color: "hsl(var(--chart-1))",
-        },
-        revenue: {
-            label: "Ingresos",
-            color: "hsl(var(--chart-2))",
-        },
-    };
-
-    const getTickInterval = () => {
-        if (!chartData || chartData.length === 0) return 0;
-        const days = chartData.length;
-        if (days <= 7) return 0;
-        if (days <= 31) return Math.floor(days / 7);
-        if (days <= 90) return Math.floor(days / 10);
-        return Math.floor(days / 12);
-    };
-
     return (
         <div className="space-y-6">
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Orders Bar Chart */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Pedidos Diarios</CardTitle>
-                        <CardDescription>Cantidad de pedidos por día</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                    <XAxis 
-                                        dataKey="date" 
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        interval={getTickInterval()}
-                                        angle={chartData.length > 31 ? -45 : 0}
-                                        textAnchor={chartData.length > 31 ? "end" : "middle"}
-                                        height={chartData.length > 31 ? 70 : 30}
-                                    />
-                                    <YAxis 
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tickFormatter={(value) => `${value}`}
-                                    />
-                                    <ChartTooltip content={<ChartTooltipContent />} />
-                                    <Bar 
-                                        dataKey="orders" 
-                                        fill="var(--color-orders)" 
-                                        radius={[8, 8, 0, 0]}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </ChartContainer>
-                    </CardContent>
-                </Card>
-                {/* Revenue Bar Chart */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Ingresos Diarios</CardTitle>
-                        <CardDescription>Ingresos generados por día</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                                    <XAxis 
-                                        dataKey="date" 
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        interval={getTickInterval()}
-                                        angle={chartData.length > 31 ? -45 : 0}
-                                        textAnchor={chartData.length > 31 ? "end" : "middle"}
-                                        height={chartData.length > 31 ? 70 : 30}
-                                    />
-                                    <YAxis 
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                                    />
-                                    <ChartTooltip 
-                                        content={<ChartTooltipContent 
-                                            formatter={(value) => formatCurrency(value.toString())}
-                                        />} 
-                                    />
-                                    <Bar 
-                                        dataKey="revenue" 
-                                        fill="var(--color-revenue)" 
-                                        radius={[8, 8, 0, 0]}
-                                    />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </ChartContainer>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 gap-6">
+                {/* Orders Zoomable Chart */}
+                <div className="h-[500px]">
+                    <ZoomableChart 
+                        data={chartDataOrders} 
+                        title="Pedidos Diarios"
+                        description="Cantidad de pedidos por día en el período seleccionado"
+                        valueLabel="Total Pedidos"
+                    />
+                </div>
+                
+                {/* Revenue Zoomable Chart */}
+                <div className="h-[500px]">
+                    <ZoomableChart 
+                        data={chartDataRevenue} 
+                        title="Ingresos Diarios"
+                        description="Ingresos generados por día en el período seleccionado"
+                        valueLabel="Total Ingresos"
+                        formatValue={(value) => `$${value.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+                        formatYAxis={(value) => {
+                            if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+                            if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
+                            return `$${value}`;
+                        }}
+                    />
+                </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Orders */}
