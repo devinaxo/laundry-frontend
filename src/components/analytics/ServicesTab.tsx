@@ -133,7 +133,7 @@ const ServicesDataSection: React.FC<ServicesDataSectionProps> = ({ dateRange, li
                         <Award className="h-5 w-5 text-blue-600" />
                         Servicios Más Populares
                     </CardTitle>
-                    <CardDescription>Servicios más solicitados por cantidad de prendas</CardDescription>
+                    <CardDescription>Servicios más solicitados por cantidad de artículos</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-3">
@@ -155,7 +155,7 @@ const ServicesDataSection: React.FC<ServicesDataSectionProps> = ({ dateRange, li
                                         </div>
                                         <div className="text-right">
                                             <p className="font-bold text-blue-600">{service.total_quantity}</p>
-                                            <p className="text-xs text-muted-foreground">prendas</p>
+                                            <p className="text-xs text-muted-foreground">artículos</p>
                                         </div>
                                     </div>
                                     <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden">
@@ -232,7 +232,7 @@ const ServicesDataSection: React.FC<ServicesDataSectionProps> = ({ dateRange, li
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-muted-foreground mb-1">Total de Prendas</p>
+                                <p className="text-sm text-muted-foreground mb-1">Total de Artículos</p>
                                 <p className="text-3xl font-bold text-blue-600">
                                     {popularServices.popular_services.reduce((sum, service) => sum + (Number(service.total_quantity) || 0), 0)}
                                 </p>
