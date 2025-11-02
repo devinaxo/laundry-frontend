@@ -222,7 +222,7 @@ const ClientsDataSection: React.FC<ClientsDataSectionProps> = ({ dateRange, limi
                                                     <Clock className="h-3 w-3" />
                                                     Cliente desde hace
                                                 </p>
-                                                <p className="text-lg font-bold text-foreground">{Math.round(client.customer_since_days)} días</p>
+                                                <p className="text-lg font-bold text-foreground">{Math.floor(client.customer_since_days)} días</p>
                                             </div>
                                         </div>
                                         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
