@@ -12,6 +12,8 @@ import SubcategoriesList from '@/pages/subcategories/SubcategoriesList';
 import NewUser from '@/pages/users/NewUser';
 import UsersList from '@/pages/users/UsersList';
 import Analytics from '@/pages/analytics/Analytics';
+import ForgotPassword from '@/pages/auth/ForgotPassword';
+import ResetPassword from '@/pages/auth/ResetPassword';
 import type { LucideIcon } from 'lucide-react';
 import { BookPlus, BookUser, ClipboardList, Home, Package, PackagePlus, Plus, UserCog, UserPlus, Users, BarChart3 } from 'lucide-react';
 
@@ -263,6 +265,24 @@ export const routes: RouteConfig[] = [
         path: '/404',
         component: NotFound,
         title: 'Página no encontrada',
+        icon: Home,
+        showInSidebar: false,
+        requiresAuth: false,
+        permissions: [],
+    },
+    {
+        path: '/forgot-password',
+        component: ForgotPassword,
+        title: 'Recuperar Contraseña',
+        icon: Home,
+        showInSidebar: false,
+        requiresAuth: false,
+        permissions: [],
+    },
+    {
+        path: '/reset-password',
+        component: ResetPassword,
+        title: 'Restablecer Contraseña',
         icon: Home,
         showInSidebar: false,
         requiresAuth: false,
