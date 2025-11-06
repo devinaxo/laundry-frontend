@@ -16,6 +16,26 @@ export const postLogout = (): Promise<LogoutResponse> => {
         .then((response) => response.data);
 };
 
+export const forgotPassword = (email: string): Promise<{ message: string }> => {
+    return instance.post('/forgot-password', { email })
+        .then((response) => response.data);
+};
+
+export const resetPassword = (
+    token: string,
+    email: string,
+    password: string,
+    password_confirmation: string
+): Promise<{ message: string }> => {
+    return instance.post('/reset-password', { 
+        token, 
+        email, 
+        password, 
+        password_confirmation 
+    })
+        .then((response) => response.data);
+};
+
 /**
  * User related POST API calls
  */

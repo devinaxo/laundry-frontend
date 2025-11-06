@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -77,6 +78,12 @@ const Login: React.FC = () => {
                     {error && (
                         <div className="text-destructive text-sm text-center">{error}</div>
                     )}
+
+                    <div className="flex items-center justify-end">
+                        <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                            ¿Olvidó su contraseña?
+                        </Link>
+                    </div>
 
                     <div>
                         <Button
