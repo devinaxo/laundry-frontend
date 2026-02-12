@@ -128,7 +128,7 @@ export default function ClientsList() {
     
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const [perPage] = useState(10);
+    const [perPage] = useState(12);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter] = useState<boolean | undefined>(undefined);
 
@@ -634,7 +634,7 @@ export default function ClientsList() {
             )}
 
             {paginationData && paginationData.last_page > 1 && (
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-2 !mb-6">
                     <Button
                         variant="outline"
                         size="sm"

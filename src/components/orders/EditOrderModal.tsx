@@ -27,6 +27,7 @@ import type { Order, Subcategory, Client, ReplaceOrderRequest } from '@/types/ap
 import { toast } from 'sonner';
 import { Plus, Trash2, Calculator, ChevronsUpDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import WhatsAppNotificationModal from './WhatsAppNotificationModal';
 
 interface EditOrderModalProps {
     order: Order | null;
@@ -50,6 +51,8 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
     const [loadingClients, setLoadingClients] = useState(true);
     const [clientComboOpen, setClientComboOpen] = useState(false);
     const [subcategoryComboStates, setSubcategoryComboStates] = useState<Record<number, boolean>>({});
+    const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+    const [whatsappClient, setWhatsappClient] = useState<{ name: string; phone: string } | null>(null);
 
     const [formData, setFormData] = useState({
         client_id: '',
@@ -214,11 +217,23 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                 }))
             };
 
+            const previousStatus = order.status;
             await replaceOrder(order.id, orderData);
             
             toast.success('Pedido actualizado exitosamente');
             onOrderUpdated();
             onClose();
+            
+            if (orderData.status === 'ready' && previousStatus !== 'ready') {
+                const client = clients.find(c => c.id.toString() === formData.client_id);
+                if (client) {
+                    setWhatsappClient({
+                        name: `${client.forename} ${client.surname}`,
+                        phone: client.phone
+                    });
+                    setWhatsappModalOpen(true);
+                }
+            }
         } catch (error) {
             console.error('Error updating order:', error);
             toast.error('Error al actualizar el pedido');
@@ -538,6 +553,13 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                     </div>
                 </form>
             </DialogContent>
+            
+            <WhatsAppNotificationModal
+                isOpen={whatsappModalOpen}
+                onClose={() => setWhatsappModalOpen(false)}
+                clientName={whatsappClient?.name || ''}
+                clientPhone={whatsappClient?.phone || ''}
+            />
         </Dialog>
     );
 }

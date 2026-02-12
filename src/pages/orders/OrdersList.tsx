@@ -27,6 +27,7 @@ import type { Order, PaginatedOrdersResponse } from '@/types/api';
 import EditOrderModal from '@/components/orders/EditOrderModal';
 import ClientMapModal from '@/components/clients/ClientMapModal';
 import OrderDetailsModal from '@/components/orders/OrderDetailsModal';
+import WhatsAppNotificationModal from '@/components/orders/WhatsAppNotificationModal';
 import {
     createColumnHelper,
     flexRender,
@@ -208,7 +209,7 @@ export default function OrdersList() {
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const [perPage] = useState(10);
+    const [perPage] = useState(12);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [dateFromFilter, setDateFromFilter] = useState('');
@@ -224,6 +225,8 @@ export default function OrdersList() {
     const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<Order | null>(null);
     const [markingAsDeliveredOrderId, setMarkingAsDeliveredOrderId] = useState<number | null>(null);
     const [updatingStatusData, setUpdatingStatusData] = useState<{ orderId: number; status: Order['status'] } | null>(null);
+    const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+    const [whatsappClient, setWhatsappClient] = useState<{ name: string; phone: string } | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -492,6 +495,14 @@ export default function OrdersList() {
             };
             toast.success(statusMessages[newStatus]);
             await fetchOrders();
+            
+            if (newStatus === 'ready') {
+                setWhatsappClient({
+                    name: `${order.client.forename} ${order.client.surname}`,
+                    phone: order.client.phone
+                });
+                setWhatsappModalOpen(true);
+            }
         } catch (error) {
             console.error('Error updating order status:', error);
             toast.error('Error al actualizar el estado del pedido');
@@ -865,7 +876,7 @@ export default function OrdersList() {
             )}
 
             {paginationData && paginationData.last_page > 1 && (
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-2 !mb-6">
                     <Button
                         variant="outline"
                         size="sm"
@@ -925,6 +936,13 @@ export default function OrdersList() {
                 client={selectedClient}
                 isOpen={clientMapModalOpen}
                 onClose={() => setClientMapModalOpen(false)}
+            />
+
+            <WhatsAppNotificationModal
+                isOpen={whatsappModalOpen}
+                onClose={() => setWhatsappModalOpen(false)}
+                clientName={whatsappClient?.name || ''}
+                clientPhone={whatsappClient?.phone || ''}
             />
         </div>
     );

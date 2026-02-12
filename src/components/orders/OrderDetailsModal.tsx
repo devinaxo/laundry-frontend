@@ -9,6 +9,7 @@ import { statusColors, statusLabels } from './statuses';
 import { updateOrderStatus } from '@/api/patchFetches';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
+import WhatsAppNotificationModal from './WhatsAppNotificationModal';
 
 interface OrderDetailsModalProps {
     order: Order | null;
@@ -27,6 +28,8 @@ export default function OrderDetailsModal({
 }: OrderDetailsModalProps) {
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [currentOrder, setCurrentOrder] = useState<Order | null>(order);
+    const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+    const [whatsappClient, setWhatsappClient] = useState<{ name: string; phone: string } | null>(null);
 
     useEffect(() => {
         setCurrentOrder(order);
@@ -53,6 +56,14 @@ export default function OrderDetailsModal({
                 toast.success('Estado del pedido actualizado exitosamente');
                 setCurrentOrder(prev => prev ? { ...prev, status: newStatus as OrderStatus } : null);
                 onStatusUpdate?.(response.data);
+                
+                if (newStatus === 'ready') {
+                    setWhatsappClient({
+                        name: `${currentOrder.client.forename} ${currentOrder.client.surname}`,
+                        phone: currentOrder.client.phone
+                    });
+                    setWhatsappModalOpen(true);
+                }
             } else {
                 toast.error('Error al actualizar el estado del pedido');
             }
@@ -259,6 +270,13 @@ export default function OrderDetailsModal({
                     </div>
                 </ScrollArea>
             </DialogContent>
+            
+            <WhatsAppNotificationModal
+                isOpen={whatsappModalOpen}
+                onClose={() => setWhatsappModalOpen(false)}
+                clientName={whatsappClient?.name || ''}
+                clientPhone={whatsappClient?.phone || ''}
+            />
         </Dialog>
     );
 }

@@ -28,8 +28,7 @@ export const ServicesPDFReport: React.FC<ServicesPDFReportProps> = ({
     };
 
     const totalRevenue = categoryRevenue.categories.reduce((sum, cat) => sum + parseFloat(cat.total_revenue), 0);
-    const maxServiceCount = Math.max(...popularServices.popular_services.map(s => s.total_quantity));
-    const totalItems = popularServices.popular_services.reduce((sum, service) => sum + service.total_quantity, 0);
+    const totalItems = popularServices.popular_services.reduce((sum, service) => sum + (Number(service.total_quantity) || 0), 0)
 
     return (
         <Document>
@@ -154,7 +153,7 @@ export const ServicesPDFReport: React.FC<ServicesPDFReportProps> = ({
                         <View style={[pdfStyles.metricCard, { backgroundColor: '#dbeafe' }]}>
                             <Text style={pdfStyles.metricLabel}>Total de Artículos</Text>
                             <Text style={[pdfStyles.metricValue, { color: '#2563eb' }]}>
-                                {totalItems.toLocaleString('es-AR')}
+                                {totalItems}
                             </Text>
                         </View>
                         <View style={[pdfStyles.metricCard, { backgroundColor: '#dcfce7' }]}>
