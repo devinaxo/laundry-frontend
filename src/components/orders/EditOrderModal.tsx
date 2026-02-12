@@ -23,9 +23,11 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { replaceOrder } from '@/api/putFetches';
 import { getSubcategoriesList, getClientsList } from '@/api/getFetches';
+import { uploadPaymentProof } from '@/api/postFetches';
+import { deletePaymentProof } from '@/api/deleteFetches';
 import type { Order, Subcategory, Client, ReplaceOrderRequest } from '@/types/api';
 import { toast } from 'sonner';
-import { Plus, Trash2, Calculator, ChevronsUpDown, Check } from 'lucide-react';
+import { Plus, Trash2, Calculator, ChevronsUpDown, Check, X, FileX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import WhatsAppNotificationModal from './WhatsAppNotificationModal';
 
@@ -53,13 +55,18 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
     const [subcategoryComboStates, setSubcategoryComboStates] = useState<Record<number, boolean>>({});
     const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
     const [whatsappClient, setWhatsappClient] = useState<{ name: string; phone: string } | null>(null);
+    const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
+    const [paymentProofDeleted, setPaymentProofDeleted] = useState(false);
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [isDeletingProof, setIsDeletingProof] = useState(false);
 
     const [formData, setFormData] = useState({
         client_id: '',
         reception_date: '',
         status: '',
         actual_delivery_date: '',
-        notes: ''
+        notes: '',
+        payment_type: ''
     });
 
     const [orderItems, setOrderItems] = useState<OrderItemFormData[]>([
@@ -107,7 +114,8 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                 reception_date: formatDateForInput(order.reception_date),
                 status: order.status || '',
                 actual_delivery_date: formatDateForInput(order.actual_delivery_date),
-                notes: order.notes || ''
+                notes: order.notes || '',
+                payment_type: order.payment_type || ''
             });
 
             setOrderItems(order.items.map(item => ({
@@ -115,6 +123,9 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                 quantity: item.quantity,
                 notes: item.notes || ''
             })));
+            
+            setPaymentProofFile(null);
+            setPaymentProofDeleted(false);
         }
     }, [order, isOpen]);
 
@@ -165,6 +176,23 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
         }
     };
 
+    const handleDeletePaymentProof = async () => {
+        if (!order) return;
+
+        setIsDeletingProof(true);
+        try {
+            await deletePaymentProof(order.id);
+            toast.success('Comprobante eliminado correctamente');
+            setPaymentProofDeleted(true);
+            setShowDeleteConfirmation(false);
+        } catch (error) {
+            console.error('Error deleting payment proof:', error);
+            toast.error('Error al eliminar el comprobante');
+        } finally {
+            setIsDeletingProof(false);
+        }
+    };
+
     const calculateTotal = (): number => {
         return orderItems.reduce((total, item) => {
             if (item.subcategory_id) {
@@ -202,6 +230,24 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
             return;
         }
 
+        // Validate payment type for delivered orders
+        if (formData.status === 'delivered' && !formData.payment_type) {
+            toast.error('Debe seleccionar el tipo de pago para pedidos entregados');
+            return;
+        }
+
+        // Validate payment proof for transfer payments
+        if (formData.status === 'delivered' && formData.payment_type === 'transfer' && !order?.has_payment_proof && !paymentProofFile && !paymentProofDeleted) {
+            toast.error('Debe agregar el comprobante de pago para pagos con transferencia');
+            return;
+        }
+
+        // Validate payment proof for transfer payments when existing proof was deleted
+        if (formData.status === 'delivered' && formData.payment_type === 'transfer' && paymentProofDeleted && !paymentProofFile) {
+            toast.error('Debe agregar un nuevo comprobante de pago');
+            return;
+        }
+
         setIsLoading(true);
         try {
             const orderData: ReplaceOrderRequest = {
@@ -210,6 +256,7 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                 status: formData.status as 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled',
                 actual_delivery_date: formData.status === 'delivered' && formData.actual_delivery_date ? formData.actual_delivery_date : undefined,
                 notes: formData.notes.trim() || undefined,
+                payment_type: formData.status === 'delivered' && formData.payment_type ? formData.payment_type as 'cash' | 'transfer' : undefined,
                 items: orderItems.map(item => ({
                     subcategory_id: parseInt(item.subcategory_id),
                     quantity: item.quantity,
@@ -219,6 +266,16 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
 
             const previousStatus = order.status;
             await replaceOrder(order.id, orderData);
+            
+            // Upload payment proof if provided
+            if (paymentProofFile && formData.status === 'delivered' && formData.payment_type === 'transfer') {
+                try {
+                    await uploadPaymentProof(order.id, paymentProofFile, 'transfer');
+                } catch (error) {
+                    console.error('Error uploading payment proof:', error);
+                    toast.error('Pedido actualizado pero hubo un error al subir el comprobante');
+                }
+            }
             
             toast.success('Pedido actualizado exitosamente');
             onOrderUpdated();
@@ -365,6 +422,78 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                                     disabled={isLoading}
                                 />
                             </div>
+                            <div>
+                                <Label htmlFor="payment_type">Tipo de Pago <span className="text-red-500">*</span></Label>
+                                <Select
+                                    value={formData.payment_type}
+                                    onValueChange={(value) => handleSelectChange('payment_type', value)}
+                                    disabled={isLoading}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar tipo de pago" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="cash">Efectivo</SelectItem>
+                                        <SelectItem value="transfer">Transferencia</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {formData.payment_type === 'transfer' && (
+                                <div>
+                                    <Label htmlFor="payment_proof">
+                                        Comprobante de Pago {(!order?.has_payment_proof || paymentProofDeleted) && <span className="text-red-500">*</span>}
+                                    </Label>
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="file"
+                                            id="payment_proof"
+                                            accept="image/*,.pdf"
+                                            onChange={(e) => setPaymentProofFile(e.target.files?.[0] || null)}
+                                            disabled={isLoading}
+                                            className="cursor-pointer"
+                                        />
+                                        {paymentProofFile && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => setPaymentProofFile(null)}
+                                                disabled={isLoading}
+                                                title="Cancelar selección"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {order?.has_payment_proof && !paymentProofDeleted && (
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="icon"
+                                                onClick={() => setShowDeleteConfirmation(true)}
+                                                disabled={isLoading}
+                                                title="Eliminar comprobante existente"
+                                            >
+                                                <FileX className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                    {paymentProofFile && (
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            Archivo seleccionado: {paymentProofFile.name}
+                                        </p>
+                                    )}
+                                    {order?.has_payment_proof && !paymentProofDeleted && !paymentProofFile && (
+                                        <p className="text-xs text-green-600 mt-1">
+                                            ✓ Ya existe un comprobante cargado
+                                        </p>
+                                    )}
+                                    {paymentProofDeleted && !paymentProofFile && (
+                                        <p className="text-xs text-amber-600 mt-1">
+                                            ⚠️ Comprobante eliminado - debe cargar uno nuevo
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -560,6 +689,42 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                 clientName={whatsappClient?.name || ''}
                 clientPhone={whatsappClient?.phone || ''}
             />
+
+            {/* Delete Payment Proof Confirmation Dialog */}
+            <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>¿Eliminar comprobante de pago?</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                            Esta acción eliminará el comprobante de pago actual. Deberá cargar un nuevo comprobante antes de guardar los cambios.
+                        </p>
+                        <p className="text-sm font-medium text-amber-600">
+                            ⚠️ Esta acción no se puede deshacer.
+                        </p>
+                        <div className="flex justify-end gap-2 pt-4">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowDeleteConfirmation(false)}
+                                disabled={isDeletingProof}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                onClick={handleDeletePaymentProof}
+                                disabled={isDeletingProof}
+                            >
+                                {isDeletingProof && <Spinner variant="circle" className="mr-2 h-4 w-4" />}
+                                {isDeletingProof ? 'Eliminando...' : 'Eliminar Comprobante'}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </Dialog>
     );
 }

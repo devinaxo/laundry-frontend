@@ -3,10 +3,12 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import type { Order } from '@/types/api';
-import { Calendar, FileText, Package, User, Phone, MapPin, Edit3 } from 'lucide-react';
+import { Calendar, FileText, Package, User, Phone, MapPin, Edit3, Banknote, Download, Eye } from 'lucide-react';
 import { statusColors, statusLabels } from './statuses';
 import { updateOrderStatus } from '@/api/patchFetches';
+import { getPaymentProof } from '@/api/getFetches';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import WhatsAppNotificationModal from './WhatsAppNotificationModal';
@@ -36,6 +38,39 @@ export default function OrderDetailsModal({
     }, [order]);
 
     if (!currentOrder) return null;
+
+    const handleDownloadPaymentProof = async () => {
+        if (!currentOrder) return;
+
+        try {
+            const blob = await getPaymentProof(currentOrder.id);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `comprobante-pedido-${currentOrder.order_number}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            toast.success('Comprobante descargado correctamente');
+        } catch (error) {
+            console.error('Error downloading payment proof:', error);
+            toast.error('Error al descargar el comprobante');
+        }
+    };
+
+    const handleViewPaymentProof = async () => {
+        if (!currentOrder) return;
+
+        try {
+            const blob = await getPaymentProof(currentOrder.id);
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        } catch (error) {
+            console.error('Error viewing payment proof:', error);
+            toast.error('Error al visualizar el comprobante');
+        }
+    };
 
     const handleStatusChange = async (newStatus: string) => {
         if (!currentOrder || newStatus === currentOrder.status) return;
@@ -249,6 +284,58 @@ export default function OrderDetailsModal({
                                 </div>
                             )}
                         </div>
+
+                        {/* Payment Information */}
+                        {currentOrder.status === 'delivered' && currentOrder.payment_type && (
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                                    <Banknote className="h-4 w-4" />
+                                    Información de Pago
+                                </h3>
+                                <div className="border border-border rounded-lg p-4 bg-card">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-950/30 flex items-center justify-center">
+                                                <Banknote className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-muted-foreground">Tipo de Pago</p>
+                                                <p className="font-semibold text-foreground">
+                                                    {currentOrder.payment_type === 'cash' ? 'Efectivo' : 'Transferencia'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {currentOrder.payment_type === 'transfer' && currentOrder.payment_proof_path && (
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={handleViewPaymentProof}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                    Ver Comprobante
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={handleDownloadPaymentProof}
+                                                    className="flex items-center gap-2"
+                                                >
+                                                    <Download className="h-4 w-4" />
+                                                    Descargar
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {currentOrder.payment_type === 'transfer' && !currentOrder.payment_proof_path && (
+                                        <div className="mt-3 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 p-2 rounded">
+                                            ⚠️ No se ha cargado un comprobante de pago
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Items */}
                         <div className="space-y-3">

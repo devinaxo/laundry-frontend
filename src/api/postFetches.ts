@@ -80,3 +80,16 @@ export const createOrder = (orderData: CreateOrderRequest): Promise<Order> => {
     return instance.post('/orders', orderData)
         .then((response) => response.data);
 };
+
+export const uploadPaymentProof = (orderId: number, file: File, paymentType: 'cash' | 'transfer'): Promise<{ message: string }> => {
+    const formData = new FormData();
+    formData.append('payment_proof', file);
+    formData.append('payment_type', paymentType);
+    
+    return instance.post(`/orders/${orderId}/payment-proof`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    })
+        .then((response) => response.data);
+};

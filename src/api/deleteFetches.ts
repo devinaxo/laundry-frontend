@@ -13,3 +13,8 @@ export const deleteClient = (clientId: number): Promise<{ message: string }> => 
     return instance.delete(`/clients/${clientId}`)
         .then((response) => response.data);
 };
+
+export const deletePaymentProof = (orderId: number): Promise<{ message: string }> => {
+    return instance.delete(`/orders/${orderId}/payment-proof`)
+        .then((response) => response.data);
+};
