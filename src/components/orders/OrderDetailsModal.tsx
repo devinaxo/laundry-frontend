@@ -12,6 +12,7 @@ import { getPaymentProof } from '@/api/getFetches';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import WhatsAppNotificationModal from './WhatsAppNotificationModal';
+import PaymentInfoModal from './PaymentInfoModal';
 
 interface OrderDetailsModalProps {
     order: Order | null;
@@ -32,6 +33,8 @@ export default function OrderDetailsModal({
     const [currentOrder, setCurrentOrder] = useState<Order | null>(order);
     const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
     const [whatsappClient, setWhatsappClient] = useState<{ name: string; phone: string } | null>(null);
+    const [paymentInfoModalOpen, setPaymentInfoModalOpen] = useState(false);
+    const [pendingDeliveredOrderId, setPendingDeliveredOrderId] = useState<number | null>(null);
 
     useEffect(() => {
         setCurrentOrder(order);
@@ -83,6 +86,13 @@ export default function OrderDetailsModal({
             return;
         }
 
+        // If changing to delivered, show payment info modal
+        if (newStatus === 'delivered') {
+            setPendingDeliveredOrderId(currentOrder.id);
+            setPaymentInfoModalOpen(true);
+            return;
+        }
+
         try {
             setIsUpdatingStatus(true);
             const response = await updateOrderStatus(currentOrder.id, newStatus as OrderStatus);
@@ -107,6 +117,29 @@ export default function OrderDetailsModal({
             toast.error('Error al actualizar el estado del pedido');
         } finally {
             setIsUpdatingStatus(false);
+        }
+    };
+
+    const handlePaymentInfoSuccess = async () => {
+        if (!pendingDeliveredOrderId || !currentOrder) return;
+
+        try {
+            setIsUpdatingStatus(true);
+            const response = await updateOrderStatus(pendingDeliveredOrderId, 'delivered');
+
+            if (response.success) {
+                toast.success('Pedido marcado como entregado');
+                setCurrentOrder(prev => prev ? { ...prev, status: 'delivered' } : null);
+                onStatusUpdate?.(response.data);
+            } else {
+                toast.error('Error al actualizar el estado del pedido');
+            }
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            toast.error('Error al actualizar el estado del pedido');
+        } finally {
+            setIsUpdatingStatus(false);
+            setPendingDeliveredOrderId(null);
         }
     };
 
@@ -391,6 +424,19 @@ export default function OrderDetailsModal({
                 clientName={whatsappClient?.name || ''}
                 clientPhone={whatsappClient?.phone || ''}
             />
+            
+            {pendingDeliveredOrderId && (
+                <PaymentInfoModal
+                    isOpen={paymentInfoModalOpen}
+                    onClose={() => {
+                        setPaymentInfoModalOpen(false);
+                        setPendingDeliveredOrderId(null);
+                    }}
+                    orderId={pendingDeliveredOrderId}
+                    orderNumber={currentOrder?.order_number || ''}
+                    onSuccess={handlePaymentInfoSuccess}
+                />
+            )}
         </Dialog>
     );
 }

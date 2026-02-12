@@ -27,7 +27,7 @@ import { uploadPaymentProof } from '@/api/postFetches';
 import { deletePaymentProof } from '@/api/deleteFetches';
 import type { Order, Subcategory, Client, ReplaceOrderRequest } from '@/types/api';
 import { toast } from 'sonner';
-import { Plus, Trash2, Calculator, ChevronsUpDown, Check, X, FileX } from 'lucide-react';
+import { Plus, Trash2, Calculator, ChevronsUpDown, Check, X, FileX, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import WhatsAppNotificationModal from './WhatsAppNotificationModal';
 
@@ -115,7 +115,8 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                 status: order.status || '',
                 actual_delivery_date: formatDateForInput(order.actual_delivery_date),
                 notes: order.notes || '',
-                payment_type: order.payment_type || ''
+                // Only keep payment_type if order is already delivered, otherwise force user to select
+                payment_type: order.status === 'delivered' ? (order.payment_type || '') : ''
             });
 
             setOrderItems(order.items.map(item => ({
@@ -148,6 +149,16 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
             ...prev,
             [field]: value
         }));
+        
+        if (field === 'status' && value !== 'delivered') {
+            setFormData(prev => ({
+                ...prev,
+                [field]: value,
+                payment_type: ''
+            }));
+            setPaymentProofFile(null);
+            setPaymentProofDeleted(false);
+        }
     };
 
     const handleItemChange = (index: number, field: keyof OrderItemFormData, value: string | number) => {
@@ -256,7 +267,7 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                 status: formData.status as 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled',
                 actual_delivery_date: formData.status === 'delivered' && formData.actual_delivery_date ? formData.actual_delivery_date : undefined,
                 notes: formData.notes.trim() || undefined,
-                payment_type: formData.status === 'delivered' && formData.payment_type ? formData.payment_type as 'cash' | 'transfer' : undefined,
+                payment_type: formData.payment_type ? formData.payment_type as 'cash' | 'transfer' : undefined,
                 items: orderItems.map(item => ({
                     subcategory_id: parseInt(item.subcategory_id),
                     quantity: item.quantity,
@@ -268,7 +279,7 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
             await replaceOrder(order.id, orderData);
             
             // Upload payment proof if provided
-            if (paymentProofFile && formData.status === 'delivered' && formData.payment_type === 'transfer') {
+            if (paymentProofFile && formData.payment_type === 'transfer') {
                 try {
                     await uploadPaymentProof(order.id, paymentProofFile, 'transfer');
                 } catch (error) {
@@ -439,59 +450,111 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                                 </Select>
                             </div>
                             {formData.payment_type === 'transfer' && (
-                                <div>
-                                    <Label htmlFor="payment_proof">
+                                <div className="md:col-span-3">
+                                    <Label htmlFor="payment_proof" className="text-sm font-medium">
                                         Comprobante de Pago {(!order?.payment_proof_path || paymentProofDeleted) && <span className="text-red-500">*</span>}
                                     </Label>
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            type="file"
-                                            id="payment_proof"
-                                            accept="image/*,.pdf"
-                                            onChange={(e) => setPaymentProofFile(e.target.files?.[0] || null)}
-                                            disabled={isLoading}
-                                            className="cursor-pointer"
-                                        />
-                                        {paymentProofFile && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => setPaymentProofFile(null)}
+                                    
+                                    {/* File Upload Area */}
+                                    <div className="mt-2 space-y-3">
+                                        <div className="relative">
+                                            <Input
+                                                type="file"
+                                                id="payment_proof"
+                                                accept="image/*,.pdf"
+                                                onChange={(e) => setPaymentProofFile(e.target.files?.[0] || null)}
                                                 disabled={isLoading}
-                                                title="Cancelar selección"
+                                                className="hidden"
+                                            />
+                                            <label
+                                                htmlFor="payment_proof"
+                                                className={cn(
+                                                    "flex items-center justify-center gap-3 px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer transition-all",
+                                                    isLoading ? "opacity-50 cursor-not-allowed" : "hover:border-primary hover:bg-accent/50",
+                                                    paymentProofFile ? "border-green-500 bg-green-50 dark:bg-green-950/20" : "border-muted-foreground/25"
+                                                )}
                                             >
-                                                <X className="h-4 w-4" />
-                                            </Button>
+                                                {paymentProofFile ? (
+                                                    <>
+                                                        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                                                        <div className="flex-1 text-left">
+                                                            <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                                                                Archivo seleccionado
+                                                            </p>
+                                                            <p className="text-xs text-green-600 dark:text-green-400 truncate">
+                                                                {paymentProofFile.name}
+                                                            </p>
+                                                        </div>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setPaymentProofFile(null);
+                                                            }}
+                                                            disabled={isLoading}
+                                                            className="h-8 w-8 p-0"
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Upload className="h-5 w-5 text-muted-foreground" />
+                                                        <div className="flex-1 text-center">
+                                                            <p className="text-sm font-medium text-foreground">
+                                                                Haz clic para seleccionar un archivo
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground mt-1">
+                                                                Formatos: Imágenes (JPG, PNG) o PDF
+                                                            </p>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </label>
+                                        </div>
+
+                                        {/* Status Messages */}
+                                        {order?.payment_proof_path && !paymentProofDeleted && !paymentProofFile && (
+                                            <div className="flex items-start gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900">
+                                                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                                                        Comprobante existente
+                                                    </p>
+                                                    <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">
+                                                        Ya hay un comprobante cargado para este pedido
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => setShowDeleteConfirmation(true)}
+                                                    disabled={isLoading}
+                                                    className="h-8 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-950/50"
+                                                >
+                                                    <FileX className="h-4 w-4 mr-1" />
+                                                    Eliminar
+                                                </Button>
+                                            </div>
                                         )}
-                                        {order?.payment_proof_path && !paymentProofDeleted && (
-                                            <Button
-                                                type="button"
-                                                variant="destructive"
-                                                size="icon"
-                                                onClick={() => setShowDeleteConfirmation(true)}
-                                                disabled={isLoading}
-                                                title="Eliminar comprobante existente"
-                                            >
-                                                <FileX className="h-4 w-4" />
-                                            </Button>
+
+                                        {paymentProofDeleted && !paymentProofFile && (
+                                            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900">
+                                                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                                                        Comprobante eliminado
+                                                    </p>
+                                                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                                                        Debes cargar un nuevo comprobante antes de guardar
+                                                    </p>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
-                                    {paymentProofFile && (
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            Archivo seleccionado: {paymentProofFile.name}
-                                        </p>
-                                    )}
-                                    {order?.payment_proof_path && !paymentProofDeleted && !paymentProofFile && (
-                                        <p className="text-xs text-green-600 mt-1">
-                                            ✓ Ya existe un comprobante cargado
-                                        </p>
-                                    )}
-                                    {paymentProofDeleted && !paymentProofFile && (
-                                        <p className="text-xs text-amber-600 mt-1">
-                                            ⚠️ Comprobante eliminado - debe cargar uno nuevo
-                                        </p>
-                                    )}
                                 </div>
                             )}
                         </div>
