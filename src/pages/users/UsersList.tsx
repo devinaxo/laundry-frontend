@@ -553,7 +553,7 @@ export default function UsersList() {
             )}
 
             {!isLoading && users.length > 0 && (
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-sm text-muted-foreground !mb-6">
                     <div>
                         Mostrando {table.getFilteredRowModel().rows.length} de {users.length} usuario(s)
                     </div>
