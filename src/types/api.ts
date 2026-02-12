@@ -393,7 +393,7 @@ export interface TopClient {
     total_orders: number;
     total_spent: string;
     average_order_value: string;
-    last_order_date: string;
+    last_delivery_date: string;
 }
 
 export interface TopClientsResponse {

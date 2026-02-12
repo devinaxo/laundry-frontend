@@ -30,7 +30,7 @@ export const pdfStyles = StyleSheet.create({
         marginTop: 5
     },
     section: {
-        marginTop: 20,
+        marginTop: 5,
         marginBottom: 15
     },
     sectionTitle: {
@@ -249,5 +249,75 @@ export const pdfStyles = StyleSheet.create({
         fontSize: 10,
         fontWeight: 'bold',
         color: '#0f172a'
+    },
+    clientCard: {
+        padding: 12,
+        marginBottom: 10,
+        borderRadius: 5,
+        border: '2 solid #e2e8f0'
+    },
+    clientHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8
+    },
+    rankBadge: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#ffffff',
+        border: '1 solid #d1d5db',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    rankNumber: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#0f172a'
+    },
+    clientName: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#0f172a',
+        marginBottom: 2
+    },
+    clientPhone: {
+        fontSize: 8,
+        color: '#64748b'
+    },
+    clientMetricsGrid: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 8,
+        marginBottom: 6
+    },
+    clientMetric: {
+        flex: 1
+    },
+    clientMetricLabel: {
+        fontSize: 7,
+        color: '#64748b',
+        marginBottom: 2
+    },
+    clientMetricValue: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#0f172a'
+    },
+    clientFooter: {
+        fontSize: 7,
+        color: '#64748b',
+        marginTop: 4
+    },
+    clientDateRange: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 4
+    },
+    emptyMessage: {
+        fontSize: 9,
+        color: '#64748b',
+        textAlign: 'center',
+        padding: 20
     }
 });

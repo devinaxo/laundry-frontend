@@ -1,25 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trophy, Users, Phone, Clock, DollarSign, ListOrdered } from 'lucide-react';
+import { Trophy, Users, Phone, Clock, DollarSign, ListOrdered, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { getTopClients, getFrequentClients } from '@/api/getFetches';
 import type { TopClientsResponse, FrequentClientsResponse } from '@/types/api';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import type { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
+import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
+import { ClientsPDFReport } from './pdf/ClientsPDFReport';
 
 const ClientsTab: React.FC = () => {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [limit, setLimit] = useState<number>(10);
+    const [showPDFModal, setShowPDFModal] = useState(false);
 
     return (
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Período de Análisis</CardTitle>
-                    <CardDescription>Selecciona el rango de fechas y cantidad de clientes a mostrar</CardDescription>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>Período de Análisis</CardTitle>
+                            <CardDescription>Selecciona el rango de fechas y cantidad de clientes a mostrar</CardDescription>
+                        </div>
+                        {dateRange?.from && dateRange?.to && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowPDFModal(true)}
+                                className="gap-2"
+                            >
+                                <FileText className="h-4 w-4" />
+                                Generar PDF
+                            </Button>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <DateRangePicker date={dateRange} onDateChange={setDateRange} />
@@ -43,7 +62,12 @@ const ClientsTab: React.FC = () => {
                 </CardContent>
             </Card>
 
-            <ClientsDataSection dateRange={dateRange} limit={limit} />
+            <ClientsDataSection 
+                dateRange={dateRange} 
+                limit={limit}
+                showPDFModal={showPDFModal}
+                setShowPDFModal={setShowPDFModal}
+            />
         </div>
     );
 };
@@ -51,9 +75,11 @@ const ClientsTab: React.FC = () => {
 interface ClientsDataSectionProps {
     dateRange: DateRange | undefined;
     limit: number;
+    showPDFModal: boolean;
+    setShowPDFModal: (show: boolean) => void;
 }
 
-const ClientsDataSection: React.FC<ClientsDataSectionProps> = ({ dateRange, limit }) => {
+const ClientsDataSection: React.FC<ClientsDataSectionProps> = ({ dateRange, limit, showPDFModal, setShowPDFModal }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [topClients, setTopClients] = useState<TopClientsResponse | null>(null);
     const [frequentClients, setFrequentClients] = useState<FrequentClientsResponse | null>(null);
@@ -116,7 +142,32 @@ const ClientsDataSection: React.FC<ClientsDataSectionProps> = ({ dateRange, limi
         );
     }
 
+    const pdfFileName = dateRange?.from && dateRange?.to
+        ? `reporte-clientes-${format(dateRange.from, 'yyyy-MM-dd')}-${format(dateRange.to, 'yyyy-MM-dd')}.pdf`
+        : 'reporte-clientes.pdf';
+
     return (
+        <>
+            {dateRange?.from && dateRange?.to && (
+                <PDFPreviewModal
+                    open={showPDFModal}
+                    onOpenChange={setShowPDFModal}
+                    title="Vista Previa del Reporte de Clientes"
+                    description="Revisa el reporte antes de descargarlo"
+                    document={
+                        <ClientsPDFReport
+                            topClients={topClients}
+                            frequentClients={frequentClients}
+                            dateRange={{
+                                from: dateRange.from,
+                                to: dateRange.to
+                            }}
+                            limit={limit}
+                        />
+                    }
+                    fileName={pdfFileName}
+                />
+            )}
         <div className="space-y-6">
             {/* Top Clients by Revenue */}
             <Card>
@@ -163,7 +214,7 @@ const ClientsDataSection: React.FC<ClientsDataSectionProps> = ({ dateRange, limi
                                             </div>
                                         </div>
                                         <div className="mt-2 text-xs text-muted-foreground">
-                                            Último pedido: {new Date(client.last_order_date).toLocaleDateString('es-AR')}
+                                            Último pedido: {new Date(client.last_delivery_date).toLocaleDateString('es-AR')}
                                         </div>
                                     </div>
                                 </div>
@@ -274,6 +325,7 @@ const ClientsDataSection: React.FC<ClientsDataSectionProps> = ({ dateRange, limi
                 </CardContent>
             </Card>
         </div>
+        </>
     );
 };
 
