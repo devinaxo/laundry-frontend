@@ -319,5 +319,36 @@ export const pdfStyles = StyleSheet.create({
         color: '#64748b',
         textAlign: 'center',
         padding: 20
+    },
+    serviceCard: {
+        padding: 12,
+        marginBottom: 10,
+        borderRadius: 5,
+        border: '2 solid #e2e8f0',
+        backgroundColor: '#f8fafc'
+    },
+    serviceHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start'
+    },
+    categoryName: {
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#0f172a',
+        marginBottom: 2
+    },
+    categoryItems: {
+        fontSize: 7,
+        color: '#64748b'
+    },
+    categoryRevenue: {
+        fontSize: 14,
+        fontWeight: 'bold'
+    },
+    categoryPercentage: {
+        fontSize: 7,
+        color: '#64748b',
+        marginTop: 2
     }
 });

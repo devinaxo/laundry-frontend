@@ -1,25 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shirt, Award, TrendingUp, Package, ListOrdered } from 'lucide-react';
+import { Shirt, Award, TrendingUp, Package, ListOrdered, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { getPopularServices, getCategoryRevenue } from '@/api/getFetches';
 import type { PopularServicesResponse, CategoryRevenueResponse } from '@/types/api';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import type { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
+import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
+import { ServicesPDFReport } from './pdf/ServicesPDFReport';
 
 const ServicesTab: React.FC = () => {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [limit, setLimit] = useState<number>(15);
+    const [showPDFModal, setShowPDFModal] = useState(false);
 
     return (
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle>Período de Análisis</CardTitle>
-                    <CardDescription>Selecciona el rango de fechas y cantidad de servicios a mostrar</CardDescription>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle>Período de Análisis</CardTitle>
+                            <CardDescription>Selecciona el rango de fechas y cantidad de servicios a mostrar</CardDescription>
+                        </div>
+                        {dateRange?.from && dateRange?.to && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowPDFModal(true)}
+                                className="gap-2"
+                            >
+                                <FileText className="h-4 w-4" />
+                                Generar PDF
+                            </Button>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <DateRangePicker date={dateRange} onDateChange={setDateRange} />
@@ -43,7 +62,12 @@ const ServicesTab: React.FC = () => {
                 </CardContent>
             </Card>
 
-            <ServicesDataSection dateRange={dateRange} limit={limit} />
+            <ServicesDataSection 
+                dateRange={dateRange} 
+                limit={limit}
+                showPDFModal={showPDFModal}
+                setShowPDFModal={setShowPDFModal}
+            />
         </div>
     );
 };
@@ -51,9 +75,11 @@ const ServicesTab: React.FC = () => {
 interface ServicesDataSectionProps {
     dateRange: DateRange | undefined;
     limit: number;
+    showPDFModal: boolean;
+    setShowPDFModal: (show: boolean) => void;
 }
 
-const ServicesDataSection: React.FC<ServicesDataSectionProps> = ({ dateRange, limit }) => {
+const ServicesDataSection: React.FC<ServicesDataSectionProps> = ({ dateRange, limit, showPDFModal, setShowPDFModal }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [popularServices, setPopularServices] = useState<PopularServicesResponse | null>(null);
     const [categoryRevenue, setCategoryRevenue] = useState<CategoryRevenueResponse | null>(null);
@@ -124,7 +150,32 @@ const ServicesDataSection: React.FC<ServicesDataSectionProps> = ({ dateRange, li
     const totalRevenue = categoryRevenue.categories.reduce((sum: number, cat) => sum + parseFloat(cat.total_revenue), 0);
     const maxServiceCount = Math.max(...popularServices.popular_services.map(s => s.total_quantity));
 
+    const pdfFileName = dateRange?.from && dateRange?.to
+        ? `reporte-servicios-${format(dateRange.from, 'yyyy-MM-dd')}-${format(dateRange.to, 'yyyy-MM-dd')}.pdf`
+        : 'reporte-servicios.pdf';
+
     return (
+        <>
+            {dateRange?.from && dateRange?.to && (
+                <PDFPreviewModal
+                    open={showPDFModal}
+                    onOpenChange={setShowPDFModal}
+                    title="Vista Previa del Reporte de Servicios"
+                    description="Revisa el reporte antes de descargarlo"
+                    document={
+                        <ServicesPDFReport
+                            popularServices={popularServices}
+                            categoryRevenue={categoryRevenue}
+                            dateRange={{
+                                from: dateRange.from,
+                                to: dateRange.to
+                            }}
+                            limit={limit}
+                        />
+                    }
+                    fileName={pdfFileName}
+                />
+            )}
         <div className="space-y-6">
             {/* Popular Services */}
             <Card>
@@ -269,6 +320,7 @@ const ServicesDataSection: React.FC<ServicesDataSectionProps> = ({ dateRange, li
                 </Card>
             </div>
         </div>
+        </>
     );
 };
 
