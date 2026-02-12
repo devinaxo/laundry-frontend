@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, TrendingUp, BarChart3 } from 'lucide-react';
+import { Calendar, TrendingUp, BarChart3, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOrdersPerMonth, getYearlyComparison } from '@/api/getFetches';
 import type { OrdersPerMonth, YearlyComparison } from '@/types/api';
+import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
+import { TrendsPDFReport } from './pdf/TrendsPDFReport';
 
 const TrendsTab: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [monthlyData, setMonthlyData] = useState<OrdersPerMonth | null>(null);
     const [yearlyComparison, setYearlyComparison] = useState<YearlyComparison | null>(null);
+    const [showPDFModal, setShowPDFModal] = useState(false);
 
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
@@ -76,8 +80,26 @@ const TrendsTab: React.FC = () => {
     const maxOrders = getMaxValue(monthlyData.data);
     const maxRevenue = getMaxRevenue(monthlyData.data);
 
+    const pdfFileName = `reporte-tendencias-${selectedYear}.pdf`;
+
     return (
         <div className="space-y-6">
+            {monthlyData && yearlyComparison && (
+                <PDFPreviewModal
+                    open={showPDFModal}
+                    onOpenChange={setShowPDFModal}
+                    title="Vista Previa del Reporte de Tendencias"
+                    description="Revisa el reporte antes de descargarlo"
+                    document={
+                        <TrendsPDFReport
+                            monthlyData={monthlyData}
+                            yearlyComparison={yearlyComparison}
+                            selectedYear={selectedYear}
+                        />
+                    }
+                    fileName={pdfFileName}
+                />
+            )}
             {/* Year Selector */}
             <Card>
                 <CardHeader>
@@ -87,6 +109,15 @@ const TrendsTab: React.FC = () => {
                             <CardDescription>Análisis de pedidos e ingresos por mes</CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowPDFModal(true)}
+                                className="gap-2"
+                            >
+                                <FileText className="h-4 w-4" />
+                                Generar PDF
+                            </Button>
                             <Calendar className="h-4 w-4 text-muted-foreground" />
                             <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
                                 <SelectTrigger className="w-[120px]">

@@ -92,7 +92,14 @@ export const getSubcategoriesList = (categoryId?: number): Promise<Subcategory[]
 export const getOrdersPaginated = (params: PaginatedOrderRequest): Promise<PaginatedOrdersResponse> => {
     return instance.get('/orders/paginated', { params })
         .then((response) => response.data);
-}
+};
+
+export const getPaymentProof = (orderId: number): Promise<Blob> => {
+    return instance.get(`/orders/${orderId}/payment-proof`, {
+        responseType: 'blob',
+    })
+        .then((response) => response.data);
+};
 
 /**
  * Dashboard related GET API calls

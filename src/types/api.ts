@@ -136,6 +136,8 @@ export interface Order {
     estimated_delivery_date?: string;
     actual_delivery_date?: string;
     notes?: string;
+    payment_type?: 'cash' | 'transfer';
+    payment_proof_path?: string;
     created_at: string;
     updated_at: string;
     client: Client;
@@ -214,6 +216,7 @@ export interface ReplaceOrderRequest {
     status?: 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled';
     actual_delivery_date?: string;
     notes?: string;
+    payment_type?: 'cash' | 'transfer';
     items: {
         subcategory_id: number;
         quantity: number;
@@ -393,7 +396,7 @@ export interface TopClient {
     total_orders: number;
     total_spent: string;
     average_order_value: string;
-    last_order_date: string;
+    last_delivery_date: string;
 }
 
 export interface TopClientsResponse {

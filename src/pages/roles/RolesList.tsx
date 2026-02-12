@@ -345,7 +345,7 @@ export default function RolesList() {
             </div>
 
             {!isLoading && roles.length > 0 && (
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-sm text-muted-foreground !mb-6">
                     <div>
                         Mostrando {table.getFilteredRowModel().rows.length} de {roles.length} rol(es)
                     </div>

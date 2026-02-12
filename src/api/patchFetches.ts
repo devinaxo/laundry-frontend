@@ -52,6 +52,7 @@ export const updateOrder = (orderId: number, orderData: {
     estimated_delivery_date?: string;
     actual_delivery_date?: string;
     notes?: string;
+    payment_type?: 'cash' | 'transfer';
 }): Promise<Order> => {
     return instance.patch(`/orders/${orderId}`, orderData)
         .then((response) => response.data);

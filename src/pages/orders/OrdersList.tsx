@@ -27,6 +27,8 @@ import type { Order, PaginatedOrdersResponse } from '@/types/api';
 import EditOrderModal from '@/components/orders/EditOrderModal';
 import ClientMapModal from '@/components/clients/ClientMapModal';
 import OrderDetailsModal from '@/components/orders/OrderDetailsModal';
+import WhatsAppNotificationModal from '@/components/orders/WhatsAppNotificationModal';
+import PaymentInfoModal from '@/components/orders/PaymentInfoModal';
 import {
     createColumnHelper,
     flexRender,
@@ -67,11 +69,10 @@ interface OrderActionsProps {
     onEditOrder: (order: Order) => void;
     onMarkAsDelivered: (order: Order) => Promise<void>;
     onViewDetails: (order: Order) => void;
-    isMarkingAsDelivered?: boolean;
     viewMode: 'table' | 'cards';
 }
 
-function OrderActions({ order, onEditOrder, onMarkAsDelivered, onViewDetails, isMarkingAsDelivered = false, viewMode }: OrderActionsProps) {
+function OrderActions({ order, onEditOrder, onMarkAsDelivered, onViewDetails, viewMode }: OrderActionsProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     const handleMarkAsDelivered = async (e: React.MouseEvent) => {
@@ -118,15 +119,10 @@ function OrderActions({ order, onEditOrder, onMarkAsDelivered, onViewDetails, is
                     <DropdownMenuItem
                         onClick={handleMarkAsDelivered}
                         className="cursor-pointer hover:bg-accent focus:bg-accent"
-                        disabled={isMarkingAsDelivered}
                     >
-                        {isMarkingAsDelivered ? (
-                            <Spinner className="mr-2 h-4 w-4" />
-                        ) : (
-                            <Check className="mr-2 h-4 w-4" />
-                        )}
+                        <Check className="mr-2 h-4 w-4" />
                         <span>
-                            {isMarkingAsDelivered ? 'Marcando...' : 'Marcar como entregada'}
+                            Marcar como entregada
                         </span>
                     </DropdownMenuItem>
                 )}
@@ -208,7 +204,7 @@ export default function OrdersList() {
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const [perPage] = useState(10);
+    const [perPage] = useState(12);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [dateFromFilter, setDateFromFilter] = useState('');
@@ -222,8 +218,11 @@ export default function OrdersList() {
     const [selectedClient, setSelectedClient] = useState<Order['client'] | null>(null);
     const [orderDetailsModalOpen, setOrderDetailsModalOpen] = useState(false);
     const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<Order | null>(null);
-    const [markingAsDeliveredOrderId, setMarkingAsDeliveredOrderId] = useState<number | null>(null);
     const [updatingStatusData, setUpdatingStatusData] = useState<{ orderId: number; status: Order['status'] } | null>(null);
+    const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+    const [whatsappClient, setWhatsappClient] = useState<{ name: string; phone: string } | null>(null);
+    const [paymentInfoModalOpen, setPaymentInfoModalOpen] = useState(false);
+    const [pendingDeliveredOrder, setPendingDeliveredOrder] = useState<Order | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -439,7 +438,6 @@ export default function OrdersList() {
                             onEditOrder={handleEditOrder}
                             onMarkAsDelivered={handleMarkAsDelivered}
                             onViewDetails={handleViewDetails}
-                            isMarkingAsDelivered={markingAsDeliveredOrderId === row.original.id}
                             viewMode={viewMode}
                         />
                     ),
@@ -466,20 +464,18 @@ export default function OrdersList() {
     };
 
     const handleMarkAsDelivered = async (order: Order): Promise<void> => {
-        setMarkingAsDeliveredOrderId(order.id);
-        try {
-            await updateOrderStatus(order.id, 'delivered');
-            toast.success('Pedido marcado como entregado');
-            await fetchOrders();
-        } catch (error) {
-            console.error('Error marking order as delivered:', error);
-            toast.error('Error al marcar el pedido como entregado');
-        } finally {
-            setMarkingAsDeliveredOrderId(null);
-        }
+        setPendingDeliveredOrder(order);
+        setPaymentInfoModalOpen(true);
     };
 
     const handleQuickStatusUpdate = async (order: Order, newStatus: Order['status']): Promise<void> => {
+        // If changing to delivered, show payment info modal
+        if (newStatus === 'delivered') {
+            setPendingDeliveredOrder(order);
+            setPaymentInfoModalOpen(true);
+            return;
+        }
+
         setUpdatingStatusData({ orderId: order.id, status: newStatus });
         try {
             await updateOrderStatus(order.id, newStatus);
@@ -492,11 +488,34 @@ export default function OrdersList() {
             };
             toast.success(statusMessages[newStatus]);
             await fetchOrders();
+            
+            if (newStatus === 'ready') {
+                setWhatsappClient({
+                    name: `${order.client.forename} ${order.client.surname}`,
+                    phone: order.client.phone
+                });
+                setWhatsappModalOpen(true);
+            }
         } catch (error) {
             console.error('Error updating order status:', error);
             toast.error('Error al actualizar el estado del pedido');
         } finally {
             setUpdatingStatusData(null);
+        }
+    };
+
+    const handlePaymentInfoSuccess = async () => {
+        if (!pendingDeliveredOrder) return;
+
+        try {
+            await updateOrderStatus(pendingDeliveredOrder.id, 'delivered');
+            toast.success('Pedido marcado como entregado');
+            await fetchOrders();
+        } catch (error) {
+            console.error('Error marking order as delivered:', error);
+            toast.error('Error al marcar el pedido como entregado');
+        } finally {
+            setPendingDeliveredOrder(null);
         }
     };
 
@@ -827,7 +846,6 @@ export default function OrdersList() {
                                                             onEditOrder={handleEditOrder}
                                                             onMarkAsDelivered={handleMarkAsDelivered}
                                                             onViewDetails={handleViewDetails}
-                                                            isMarkingAsDelivered={markingAsDeliveredOrderId === order.id}
                                                             viewMode={viewMode}
                                                         />
                                                     )}
@@ -865,7 +883,7 @@ export default function OrdersList() {
             )}
 
             {paginationData && paginationData.last_page > 1 && (
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-2 !mb-6">
                     <Button
                         variant="outline"
                         size="sm"
@@ -926,6 +944,26 @@ export default function OrdersList() {
                 isOpen={clientMapModalOpen}
                 onClose={() => setClientMapModalOpen(false)}
             />
+
+            <WhatsAppNotificationModal
+                isOpen={whatsappModalOpen}
+                onClose={() => setWhatsappModalOpen(false)}
+                clientName={whatsappClient?.name || ''}
+                clientPhone={whatsappClient?.phone || ''}
+            />
+
+            {pendingDeliveredOrder && (
+                <PaymentInfoModal
+                    isOpen={paymentInfoModalOpen}
+                    onClose={() => {
+                        setPaymentInfoModalOpen(false);
+                        setPendingDeliveredOrder(null);
+                    }}
+                    orderId={pendingDeliveredOrder.id}
+                    orderNumber={pendingDeliveredOrder.order_number}
+                    onSuccess={handlePaymentInfoSuccess}
+                />
+            )}
         </div>
     );
 }

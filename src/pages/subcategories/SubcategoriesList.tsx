@@ -482,7 +482,7 @@ export default function SubcategoriesList() {
             )}
 
             {!isLoading && subcategories.length > 0 && (
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-sm text-muted-foreground !mb-6">
                     <div>
                         Mostrando {table.getFilteredRowModel().rows.length} de {subcategories.length} subcategoría(s)
                     </div>

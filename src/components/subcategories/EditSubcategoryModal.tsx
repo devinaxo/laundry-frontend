@@ -88,7 +88,7 @@ export default function EditSubcategoryModal({ subcategory, isOpen, onClose, onS
                 price: formData.price,
                 active: formData.active
             });
-            toast.success('Subcategoría actualizada correctamente');
+            toast.success('Subcategoría actualizada correctamente', {position: 'top-right'});
             onSubcategoryUpdated(updatedSubcategory);
             onClose();
         } catch (error: unknown) {
@@ -146,6 +146,21 @@ export default function EditSubcategoryModal({ subcategory, isOpen, onClose, onS
                             </SelectContent>
                         </Select>
                     </div>
+                    
+                    <div className="space-y-2">
+                        <Label htmlFor="price">Precio <span className="text-red-500">*</span></Label>
+                        <Input
+                            id="price"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={formData.price || ''}
+                            onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                            placeholder="Precio de la subcategoría"
+                            required
+                            disabled={isSubmitting}
+                        />
+                    </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="name">Nombre <span className="text-red-500">*</span></Label>
@@ -170,20 +185,6 @@ export default function EditSubcategoryModal({ subcategory, isOpen, onClose, onS
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="price">Precio <span className="text-red-500">*</span></Label>
-                        <Input
-                            id="price"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={formData.price || ''}
-                            onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-                            placeholder="Precio de la subcategoría"
-                            required
-                            disabled={isSubmitting}
-                        />
-                    </div>
 
                     <div className="flex items-center space-x-2">
                         <input
