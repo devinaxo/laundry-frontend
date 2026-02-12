@@ -210,5 +210,44 @@ export const pdfStyles = StyleSheet.create({
         fontSize: 10,
         color: '#1e40af',
         fontWeight: 'bold'
+    },
+    progressBarContainer: {
+        width: '100%',
+        height: 10,
+        backgroundColor: '#e2e8f0',
+        borderRadius: 3,
+        overflow: 'hidden'
+    },
+    progressBarFill: {
+        height: '100%',
+        borderRadius: 3
+    },
+    yearComparisonCard: {
+        width: '48%',
+        padding: 15,
+        backgroundColor: '#f8fafc',
+        borderRadius: 5,
+        border: '2 solid #e2e8f0',
+        marginBottom: 10
+    },
+    yearTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#0f172a'
+    },
+    yearMetricRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 6,
+        paddingVertical: 3
+    },
+    yearMetricLabel: {
+        fontSize: 9,
+        color: '#64748b'
+    },
+    yearMetricValue: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#0f172a'
     }
 });
