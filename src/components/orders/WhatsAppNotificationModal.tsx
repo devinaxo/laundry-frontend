@@ -17,7 +17,7 @@ export default function WhatsAppNotificationModal({
 }: WhatsAppNotificationModalProps) {
     const handleSendWhatsApp = () => {
         const message = encodeURIComponent(
-            `Hola ${clientName}, su artículo de lavandería ya está listo para retirar, o podemos pasar a dejarlo a su domicilio. Saludos`
+            `Hola ${clientName}, su(s) artículo(s) de lavandería ya está(n) listo(s) para retirar, o podemos pasar a dejarlo(s) a su domicilio. Saludos`
         );
         const cleanedNumber = clientPhone.replace(/\D/g, '');
         window.open(`https://wa.me/${cleanedNumber}?text=${message}`, '_blank');
