@@ -237,7 +237,7 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
         }
 
         // Validate payment proof for transfer payments
-        if (formData.status === 'delivered' && formData.payment_type === 'transfer' && !order?.has_payment_proof && !paymentProofFile && !paymentProofDeleted) {
+        if (formData.status === 'delivered' && formData.payment_type === 'transfer' && !order?.payment_proof_path && !paymentProofFile && !paymentProofDeleted) {
             toast.error('Debe agregar el comprobante de pago para pagos con transferencia');
             return;
         }
@@ -441,7 +441,7 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                             {formData.payment_type === 'transfer' && (
                                 <div>
                                     <Label htmlFor="payment_proof">
-                                        Comprobante de Pago {(!order?.has_payment_proof || paymentProofDeleted) && <span className="text-red-500">*</span>}
+                                        Comprobante de Pago {(!order?.payment_proof_path || paymentProofDeleted) && <span className="text-red-500">*</span>}
                                     </Label>
                                     <div className="flex items-center gap-2">
                                         <Input
@@ -464,7 +464,7 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                                                 <X className="h-4 w-4" />
                                             </Button>
                                         )}
-                                        {order?.has_payment_proof && !paymentProofDeleted && (
+                                        {order?.payment_proof_path && !paymentProofDeleted && (
                                             <Button
                                                 type="button"
                                                 variant="destructive"
@@ -482,7 +482,7 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                                             Archivo seleccionado: {paymentProofFile.name}
                                         </p>
                                     )}
-                                    {order?.has_payment_proof && !paymentProofDeleted && !paymentProofFile && (
+                                    {order?.payment_proof_path && !paymentProofDeleted && !paymentProofFile && (
                                         <p className="text-xs text-green-600 mt-1">
                                             ✓ Ya existe un comprobante cargado
                                         </p>
