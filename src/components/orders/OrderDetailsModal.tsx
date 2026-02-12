@@ -141,84 +141,111 @@ export default function OrderDetailsModal({
                     <div className="space-y-6">
                         {/* Client Information */}
                         <div className="space-y-3">
-                            <h3 className="text-lg text-foreground font-semibold flex items-center gap-2">
-                                <User className="h-5 w-5" />
-                                Información del Cliente
+                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                Cliente
                             </h3>
-                            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="font-medium text-foreground">
+                            <div className="border border-border rounded-lg p-4 bg-card space-y-3">
+                                <div className="pb-2 border-b border-border">
+                                    <p className="font-semibold text-foreground text-base">
                                         {currentOrder.client.forename} {currentOrder.client.surname}
-                                    </span>
-                                    <div className="flex items-center gap-3">
-                                        <a
-                                            href={`https://wa.me/${currentOrder.client.phone.replace(/\D/g, '')}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-1 text-green-600 hover:text-green-700 transition-all duration-200 ease-in-out"
-                                        >
-                                            <Phone className="h-4 w-4" />
+                                    </p>
+                                </div>
+                                <a
+                                    href={`https://wa.me/${currentOrder.client.phone.replace(/\D/g, '')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 hover:text-green-600 dark:hover:text-green-400 transition-colors group"
+                                >
+                                    <Phone className="h-4 w-4 text-muted-foreground group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors flex-shrink-0" />
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted-foreground">Teléfono</p>
+                                        <p className="font-medium text-foreground">
                                             {currentOrder.client.phone}
-                                        </a>
+                                        </p>
                                     </div>
-                                </div>
-                                <div className="flex items-start gap-2 text-sm">
-                                    <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                                    <a
-                                        href={`https://www.google.com/maps?q=${currentOrder.client.latitude},${currentOrder.client.longitude}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:text-blue-700 transition-colors duration-200 hover:underline"
-                                        title="Ver ubicación en Google Maps"
-                                    >
-                                        {currentOrder.client.address}
-                                    </a>
-                                </div>
+                                </a>
+                                <a
+                                    href={`https://www.google.com/maps?q=${currentOrder.client.latitude},${currentOrder.client.longitude}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+                                    title="Ver ubicación en Google Maps"
+                                >
+                                    <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                                    <div className="flex-1">
+                                        <p className="text-xs text-muted-foreground">Dirección</p>
+                                        <p className="text-sm text-foreground">
+                                            {currentOrder.client.address}
+                                        </p>
+                                    </div>
+                                </a>
                             </div>
                         </div>
 
                         {/* Order Information */}
                         <div className="space-y-3">
-                            <h3 className="text-lg text-foreground font-semibold flex items-center gap-2">
-                                <FileText className="h-5 w-5" />
-                                Información del Pedido
+                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                                <FileText className="h-4 w-4" />
+                                Detalles del Pedido
                             </h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-muted/50 rounded-lg p-3">
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                        <Calendar className="h-4 w-4" />
-                                        Fecha de Recepción
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="border border-border rounded-lg p-4 bg-card hover:shadow-sm transition-shadow">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/30 flex items-center justify-center">
+                                            <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                        </div>
+                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Recepción</span>
                                     </div>
-                                    <div className="font-medium text-foreground">
+                                    <div className="font-semibold text-foreground text-base">
                                         {new Date(currentOrder.reception_date).toLocaleDateString('es-ES', {
                                             year: 'numeric',
-                                            month: 'long',
+                                            month: 'short',
                                             day: 'numeric',
+                                        })}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                        {new Date(currentOrder.reception_date).toLocaleDateString('es-ES', {
+                                            weekday: 'long',
                                         })}
                                     </div>
                                 </div>
 
-                                <div className="bg-muted/50 rounded-lg p-3">
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                                        <Calendar className="h-4 w-4" />
-                                        Fecha de Entrega
+                                <div className="border border-border rounded-lg p-4 bg-card hover:shadow-sm transition-shadow">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/30 flex items-center justify-center">
+                                            <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                        </div>
+                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Entrega</span>
                                     </div>
-                                    <div className="font-medium text-foreground">
+                                    <div className="font-semibold text-foreground text-base">
                                         {currentOrder.actual_delivery_date ?
                                             new Date(currentOrder.actual_delivery_date).toLocaleDateString('es-ES', {
                                                 year: 'numeric',
-                                                month: 'long',
+                                                month: 'short',
                                                 day: 'numeric',
-                                            }) : '-'
+                                            }) : <span className="text-muted-foreground">Pendiente</span>
                                         }
                                     </div>
+                                    {currentOrder.actual_delivery_date && (
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                            {new Date(currentOrder.actual_delivery_date).toLocaleDateString('es-ES', {
+                                                weekday: 'long',
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             {currentOrder.notes && (
-                                <div className="bg-muted/50 rounded-lg p-3">
-                                    <div className="text-sm text-muted-foreground mb-2">Notas</div>
-                                    <div className="text-sm text-foreground">{currentOrder.notes}</div>
+                                <div className="border border-border rounded-lg p-4 bg-amber-50 dark:bg-amber-950/10 border-amber-200 dark:border-amber-900">
+                                    <div className="flex items-start gap-2">
+                                        <FileText className="h-4 w-4 text-amber-600 dark:text-amber-500 mt-0.5 flex-shrink-0" />
+                                        <div className="flex-1">
+                                            <p className="text-xs font-medium text-amber-900 dark:text-amber-200 mb-1 uppercase tracking-wide">Notas</p>
+                                            <p className="text-sm text-amber-900 dark:text-amber-100 leading-relaxed">{currentOrder.notes}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>
