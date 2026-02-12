@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
+import type { DocumentProps } from '@react-pdf/renderer';
 import { Download, Loader2 } from 'lucide-react';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 
@@ -10,7 +11,7 @@ interface PDFPreviewModalProps {
     onOpenChange: (open: boolean) => void;
     title: string;
     description?: string;
-    document: React.ReactElement;
+    document: React.ReactElement<DocumentProps>;
     fileName: string;
 }
 
