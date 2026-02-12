@@ -155,12 +155,12 @@ export default function OrderDetailsModal({
                                     href={`https://wa.me/${currentOrder.client.phone.replace(/\D/g, '')}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-3 hover:text-green-600 dark:hover:text-green-400 transition-colors group"
+                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-950/20 transition-colors group cursor-pointer"
                                 >
-                                    <Phone className="h-4 w-4 text-muted-foreground group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors flex-shrink-0" />
+                                    <Phone className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Teléfono</p>
-                                        <p className="font-medium text-foreground">
+                                        <p className="font-medium text-green-600 dark:text-green-400 group-hover:underline">
                                             {currentOrder.client.phone}
                                         </p>
                                     </div>
@@ -169,13 +169,13 @@ export default function OrderDetailsModal({
                                     href={`https://www.google.com/maps?q=${currentOrder.client.latitude},${currentOrder.client.longitude}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-3 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors group cursor-pointer"
                                     title="Ver ubicación en Google Maps"
                                 >
-                                    <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                                    <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Dirección</p>
-                                        <p className="text-sm text-foreground">
+                                        <p className="text-sm text-blue-600 dark:text-blue-400 group-hover:underline">
                                             {currentOrder.client.address}
                                         </p>
                                     </div>
@@ -253,7 +253,7 @@ export default function OrderDetailsModal({
                         {/* Items */}
                         <div className="space-y-3">
                             <h3 className="text-lg text-foreground font-semibold flex items-center gap-2">
-                                <Package className="h-5 w-5" />
+                                <Package className="h-5 w-5 text-blue-600" />
                                 Artículos ({totalItems} artículo{totalItems !== 1 ? 's' : ''})
                             </h3>
                             <div className="space-y-3">
