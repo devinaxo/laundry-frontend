@@ -200,7 +200,7 @@ export default function OrderDetailsModal({
                     </SelectItem>
                     <SelectItem value="ready">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <div className="w-2 h-2 rounded-full bg-primary"></div>
                         Listo
                       </div>
                     </SelectItem>
@@ -263,10 +263,10 @@ export default function OrderDetailsModal({
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors group cursor-pointer"
                   title="Ver ubicación en Google Maps"
                 >
-                  <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                  <MapPin className="h-4 w-4 text-primary dark:text-blue-400 flex-shrink-0" />
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground">Dirección</p>
-                    <p className="text-sm text-blue-600 dark:text-blue-400 group-hover:underline">
+                    <p className="text-sm text-primary dark:text-blue-400 group-hover:underline">
                       {currentOrder.client.address}
                     </p>
                   </div>
@@ -396,7 +396,7 @@ export default function OrderDetailsModal({
             {/* Items */}
             <div className="space-y-3">
               <h3 className="text-lg text-foreground font-semibold flex items-center gap-2">
-                <Package className="h-5 w-5 text-blue-600" />
+                <Package className="h-5 w-5 text-primary" />
                 Artículos ({totalItems} artículo{totalItems !== 1 ? 's' : ''})
               </h3>
               <div className="space-y-3">

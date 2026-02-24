@@ -100,12 +100,12 @@ const Dashboard: React.FC = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Package className="h-5 w-5 text-blue-600" />
+                  <Package className="h-5 w-5 text-primary" />
                   Pedidos de Hoy
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-blue-600">
+                <p className="text-3xl font-bold text-primary">
                   {dashboardData?.orders_today.count || 0}
                 </p>
                 <CardDescription className="flex items-center gap-1">
@@ -208,7 +208,7 @@ const Dashboard: React.FC = () => {
                     className="w-full text-left p-3 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <Plus className="h-5 w-5 text-blue-600" />
+                      <Plus className="h-5 w-5 text-primary" />
                       <div>
                         <p className="font-medium text-foreground">Nuevo Pedido</p>
                         <p className="text-sm text-muted-foreground">Crear un nuevo pedido de lavandería</p>
@@ -271,7 +271,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between p-3 bg-muted rounded">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-primary"></div>
                       <span className="font-medium">Listos</span>
                     </div>
                     <span className="text-lg font-bold">
