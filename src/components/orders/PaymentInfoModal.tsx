@@ -16,7 +16,7 @@ interface PaymentInfoModalProps {
     onClose: () => void;
     orderId: number;
     orderNumber: string;
-    onSuccess?: () => void;
+    onSuccess?: (paymentType: 'cash' | 'transfer') => void;
 }
 
 export default function PaymentInfoModal({ isOpen, onClose, orderId, orderNumber, onSuccess }: PaymentInfoModalProps) {
@@ -48,7 +48,7 @@ export default function PaymentInfoModal({ isOpen, onClose, orderId, orderNumber
             }
 
             toast.success('Información de pago guardada correctamente');
-            onSuccess?.();
+            onSuccess?.(paymentType as 'cash' | 'transfer');
             onClose();
             
             setPaymentType('');
