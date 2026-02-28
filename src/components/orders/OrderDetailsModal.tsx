@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import type { Order } from '@/types/api';
-import { Calendar, FileText, Package, User, Phone, MapPin, Edit3, Banknote, Download, Eye } from 'lucide-react';
+import { Calendar, FileText, Package, User, Phone, MapPin, Edit3, Banknote, Download, Eye, Paperclip } from 'lucide-react';
 import { statusColors, statusLabels } from './statuses';
 import { updateOrderStatus } from '@/api/patchFetches';
 import { getPaymentProof } from '@/api/getFetches';
@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import WhatsAppNotificationModal from './WhatsAppNotificationModal';
 import PaymentInfoModal from './PaymentInfoModal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface OrderDetailsModalProps {
   order: Order | null;
@@ -35,6 +36,7 @@ export default function OrderDetailsModal({
   const [whatsappClient, setWhatsappClient] = useState<{ name: string; phone: string } | null>(null);
   const [paymentInfoModalOpen, setPaymentInfoModalOpen] = useState(false);
   const [pendingDeliveredOrderId, setPendingDeliveredOrderId] = useState<number | null>(null);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
 
   useEffect(() => {
     setCurrentOrder(order);
@@ -90,6 +92,12 @@ export default function OrderDetailsModal({
     if (newStatus === 'delivered') {
       setPendingDeliveredOrderId(currentOrder.id);
       setPaymentInfoModalOpen(true);
+      return;
+    }
+
+    // If changing to cancelled and there's a payment proof, warn the user
+    if (newStatus === 'cancelled' && currentOrder.payment_proof_path) {
+      setCancelConfirmOpen(true);
       return;
     }
 
@@ -384,7 +392,13 @@ export default function OrderDetailsModal({
                       </div>
                     )}
                   </div>
-                  {currentOrder.payment_type === 'transfer' && !currentOrder.payment_proof_path && (
+{currentOrder.payment_type === 'transfer' && currentOrder.payment_proof_path && (
+                    <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                      <Paperclip className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">{currentOrder.payment_proof_path.split('/').pop()}</span>
+                    </div>
+                  )}
+                    {currentOrder.payment_type === 'transfer' && !currentOrder.payment_proof_path && (
                     <div className="mt-3 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 p-2 rounded">
                       ⚠️ No se ha cargado un comprobante de pago
                     </div>
@@ -460,6 +474,40 @@ export default function OrderDetailsModal({
           onSuccess={(pt) => handlePaymentInfoSuccess(pt)}
         />
       )}
+
+      <ConfirmDialog
+        open={cancelConfirmOpen}
+        onOpenChange={setCancelConfirmOpen}
+        title="¿Cancelar pedido?"
+        description={`El pedido #${currentOrder?.order_number} tiene un comprobante de pago adjunto (${currentOrder?.payment_proof_path?.split('/').pop()}). Al cancelar el pedido, el comprobante será eliminado permanentemente.`}
+        confirmLabel="Cancelar pedido"
+        cancelLabel="Volver"
+        variant="destructive"
+        onConfirm={async () => {
+          setCancelConfirmOpen(false);
+          try {
+            setIsUpdatingStatus(true);
+            const response = await updateOrderStatus(currentOrder!.id, 'cancelled');
+            if (response.success) {
+              toast.success('Pedido cancelado');
+              setCurrentOrder(prev => prev ? {
+                ...prev,
+                ...response.data,
+                items: response.data.items ?? prev.items,
+                client: response.data.client ?? prev.client,
+              } : null);
+              onStatusUpdate?.(response.data);
+            } else {
+              toast.error('Error al cancelar el pedido');
+            }
+          } catch (error) {
+            console.error('Error cancelling order:', error);
+            toast.error('Error al cancelar el pedido');
+          } finally {
+            setIsUpdatingStatus(false);
+          }
+        }}
+      />
     </Dialog>
   );
 }
