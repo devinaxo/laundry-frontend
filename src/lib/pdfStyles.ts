@@ -1,171 +1,176 @@
 import { StyleSheet } from '@react-pdf/renderer';
 
+// Professional, print-optimized styles — minimal color, tight spacing
 export const pdfStyles = StyleSheet.create({
+    // ── Layout ──────────────────────────────────────────────
     page: {
-        padding: 40,
-        fontSize: 10,
+        padding: 30,
+        paddingBottom: 50,
+        fontSize: 9,
         fontFamily: 'Helvetica',
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        color: '#1a1a1a'
     },
     header: {
-        marginBottom: 20,
-        borderBottom: '2 solid #2563eb',
-        paddingBottom: 10
+        marginBottom: 12,
+        borderBottom: '1.5 solid #1e3a5f',
+        paddingBottom: 6
     },
     title: {
-        fontSize: 24,
+        fontSize: 15,
         fontWeight: 'bold',
-        color: '#1e40af',
-        marginBottom: 5
+        color: '#1e3a5f',
+        marginBottom: 2
     },
     subtitle: {
-        fontSize: 12,
-        color: '#64748b',
-        marginBottom: 3
+        fontSize: 9,
+        color: '#555555',
+        marginBottom: 2
     },
     dateRange: {
-        fontSize: 11,
-        color: '#475569',
-        fontWeight: 'bold',
-        marginTop: 5
+        fontSize: 9,
+        color: '#333333',
+        marginTop: 2
     },
     section: {
-        marginTop: 5,
-        marginBottom: 15
+        marginTop: 4,
+        marginBottom: 10
     },
     sectionTitle: {
-        fontSize: 14,
+        fontSize: 11,
         fontWeight: 'bold',
-        color: '#1e293b',
-        marginBottom: 12,
-        borderBottom: '1 solid #e2e8f0',
-        paddingBottom: 5
+        color: '#1e3a5f',
+        marginBottom: 6,
+        borderBottom: '0.5 solid #cccccc',
+        paddingBottom: 3
     },
+
+    // ── Metrics Grid ────────────────────────────────────────
     metricsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
-        marginBottom: 10
+        gap: 0,
+        marginBottom: 6
     },
     metricCard: {
-        width: '48%',
-        padding: 12,
-        backgroundColor: '#f8fafc',
-        borderRadius: 5,
-        border: '1 solid #e2e8f0',
-        marginBottom: 10
+        width: '50%',
+        paddingVertical: 4,
+        paddingHorizontal: 6,
+        borderBottom: '0.5 solid #e0e0e0'
     },
     metricLabel: {
-        fontSize: 9,
-        color: '#64748b',
-        marginBottom: 5,
+        fontSize: 7,
+        color: '#666666',
+        marginBottom: 1,
         textTransform: 'uppercase'
     },
     metricValue: {
-        fontSize: 18,
+        fontSize: 12,
         fontWeight: 'bold',
-        color: '#0f172a',
-        marginBottom: 4
+        color: '#000000',
+        marginBottom: 1
     },
     metricGrowth: {
-        fontSize: 8,
-        marginTop: 3
+        fontSize: 7,
+        marginTop: 1
     },
     growthPositive: {
-        color: '#16a34a'
+        color: '#2e7d32'
     },
     growthNegative: {
-        color: '#dc2626'
+        color: '#c62828'
     },
     growthNeutral: {
-        color: '#64748b'
+        color: '#666666'
     },
+
+    // ── Range Cards (overview high/low) ─────────────────────
     rangeContainer: {
         flexDirection: 'row',
-        gap: 10,
-        marginBottom: 10
+        gap: 0,
+        marginBottom: 6
     },
     rangeCard: {
         flex: 1,
-        padding: 12,
-        borderRadius: 5,
-        border: '1 solid #e2e8f0'
+        paddingVertical: 4,
+        paddingHorizontal: 6,
+        borderBottom: '0.5 solid #e0e0e0'
     },
-    rangeCardHigh: {
-        backgroundColor: '#dcfce7'
-    },
-    rangeCardLow: {
-        backgroundColor: '#dbeafe'
-    },
+    rangeCardHigh: {},
+    rangeCardLow: {},
     rangeLabel: {
-        fontSize: 9,
+        fontSize: 7,
         fontWeight: 'bold',
-        marginBottom: 5
+        color: '#666666',
+        marginBottom: 2,
+        textTransform: 'uppercase'
     },
     rangeValue: {
-        fontSize: 16,
-        fontWeight: 'bold'
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#000000'
     },
+
+    // ── Status Table ────────────────────────────────────────
     statusTable: {
-        marginTop: 10
+        marginTop: 4
     },
     statusRow: {
         flexDirection: 'row',
-        paddingVertical: 6,
-        paddingHorizontal: 10,
-        borderBottom: '1 solid #e2e8f0',
+        paddingVertical: 3,
+        paddingHorizontal: 4,
+        borderBottom: '0.5 solid #e0e0e0',
         alignItems: 'center'
     },
     statusHeader: {
-        backgroundColor: '#f1f5f9',
+        backgroundColor: '#f5f5f5',
         fontWeight: 'bold',
-        fontSize: 9,
-        color: '#475569'
+        fontSize: 7,
+        color: '#333333'
     },
     statusName: {
         width: '40%',
-        fontSize: 9
+        fontSize: 8
     },
     statusCount: {
         width: '20%',
-        fontSize: 9,
+        fontSize: 8,
         textAlign: 'center'
     },
     statusPercentage: {
         width: '20%',
-        fontSize: 9,
+        fontSize: 8,
         textAlign: 'center'
     },
     statusBar: {
         width: '20%',
-        height: 8,
-        backgroundColor: '#e2e8f0',
-        borderRadius: 4,
-        overflow: 'hidden',
-        marginLeft: 5
+        height: 5,
+        backgroundColor: '#e5e5e5',
+        overflow: 'hidden'
     },
     statusBarFill: {
-        height: '100%',
-        borderRadius: 4
+        height: '100%'
     },
+
+    // ── Data Tables ─────────────────────────────────────────
     dailyStatsTable: {
-        marginTop: 10
+        marginTop: 4
     },
     tableRow: {
         flexDirection: 'row',
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderBottom: '1 solid #e2e8f0'
+        paddingVertical: 3,
+        paddingHorizontal: 4,
+        borderBottom: '0.5 solid #e0e0e0'
     },
     tableHeader: {
-        backgroundColor: '#f1f5f9',
+        backgroundColor: '#f5f5f5',
         fontWeight: 'bold',
-        fontSize: 9,
-        color: '#475569'
+        fontSize: 7,
+        color: '#333333'
     },
     tableCell: {
         fontSize: 8,
-        color: '#334155'
+        color: '#1a1a1a'
     },
     tableCellDate: {
         width: '33%'
@@ -178,154 +183,156 @@ export const pdfStyles = StyleSheet.create({
         width: '34%',
         textAlign: 'right'
     },
+
+    // ── Footer ──────────────────────────────────────────────
     footer: {
         position: 'absolute',
-        bottom: 30,
-        left: 40,
-        right: 40,
+        bottom: 20,
+        left: 30,
+        right: 30,
         textAlign: 'center',
-        color: '#94a3b8',
-        fontSize: 8,
-        borderTop: '1 solid #e2e8f0',
-        paddingTop: 10
+        color: '#999999',
+        fontSize: 7,
+        borderTop: '0.5 solid #cccccc',
+        paddingTop: 6
     },
+
+    // ── Summary Box ─────────────────────────────────────────
     summaryBox: {
-        backgroundColor: '#eff6ff',
-        padding: 12,
-        borderRadius: 5,
-        border: '1 solid #93c5fd',
-        marginTop: 10
+        padding: 6,
+        border: '0.5 solid #cccccc',
+        marginTop: 6
     },
     summaryRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 5
+        marginBottom: 2
     },
     summaryLabel: {
-        fontSize: 10,
-        color: '#1e40af',
+        fontSize: 8,
+        color: '#1e3a5f',
         fontWeight: 'bold'
     },
     summaryValue: {
-        fontSize: 10,
-        color: '#1e40af',
+        fontSize: 8,
+        color: '#1e3a5f',
         fontWeight: 'bold'
     },
+
+    // ── Progress Bars ───────────────────────────────────────
     progressBarContainer: {
         width: '100%',
-        height: 10,
-        backgroundColor: '#e2e8f0',
-        borderRadius: 3,
+        height: 6,
+        backgroundColor: '#e5e5e5',
         overflow: 'hidden'
     },
     progressBarFill: {
-        height: '100%',
-        borderRadius: 3
+        height: '100%'
     },
+
+    // ── Year Comparison ─────────────────────────────────────
     yearComparisonCard: {
         width: '48%',
-        padding: 15,
-        backgroundColor: '#f8fafc',
-        borderRadius: 5,
-        border: '2 solid #e2e8f0',
-        marginBottom: 10
+        padding: 8,
+        border: '0.5 solid #cccccc',
+        marginBottom: 6
     },
     yearTitle: {
-        fontSize: 20,
+        fontSize: 13,
         fontWeight: 'bold',
-        color: '#0f172a'
+        color: '#000000'
     },
     yearMetricRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 6,
-        paddingVertical: 3
+        marginBottom: 3,
+        paddingVertical: 1
     },
     yearMetricLabel: {
-        fontSize: 9,
-        color: '#64748b'
+        fontSize: 8,
+        color: '#666666'
     },
     yearMetricValue: {
-        fontSize: 10,
+        fontSize: 8,
         fontWeight: 'bold',
-        color: '#0f172a'
+        color: '#000000'
     },
+
+    // ── Client rows (table-based) ───────────────────────────
     clientCard: {
-        padding: 12,
-        marginBottom: 10,
-        borderRadius: 5,
-        border: '2 solid #e2e8f0'
+        paddingVertical: 4,
+        paddingHorizontal: 4,
+        marginBottom: 0,
+        borderBottom: '0.5 solid #e0e0e0'
     },
     clientHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8
+        marginBottom: 2
     },
     rankBadge: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#ffffff',
-        border: '1 solid #d1d5db',
+        width: 14,
+        height: 14,
         justifyContent: 'center',
         alignItems: 'center'
     },
     rankNumber: {
-        fontSize: 10,
+        fontSize: 8,
         fontWeight: 'bold',
-        color: '#0f172a'
+        color: '#000000'
     },
     clientName: {
-        fontSize: 11,
+        fontSize: 9,
         fontWeight: 'bold',
-        color: '#0f172a',
-        marginBottom: 2
+        color: '#000000',
+        marginBottom: 1
     },
     clientPhone: {
-        fontSize: 8,
-        color: '#64748b'
+        fontSize: 7,
+        color: '#666666'
     },
     clientMetricsGrid: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 8,
-        marginBottom: 6
+        marginTop: 2,
+        marginBottom: 2
     },
     clientMetric: {
         flex: 1
     },
     clientMetricLabel: {
         fontSize: 7,
-        color: '#64748b',
-        marginBottom: 2
+        color: '#666666',
+        marginBottom: 1
     },
     clientMetricValue: {
-        fontSize: 10,
+        fontSize: 8,
         fontWeight: 'bold',
-        color: '#0f172a'
+        color: '#000000'
     },
     clientFooter: {
         fontSize: 7,
-        color: '#64748b',
-        marginTop: 4
+        color: '#666666',
+        marginTop: 1
     },
     clientDateRange: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 4
+        marginTop: 1
     },
     emptyMessage: {
-        fontSize: 9,
-        color: '#64748b',
+        fontSize: 8,
+        color: '#666666',
         textAlign: 'center',
-        padding: 20
+        padding: 10
     },
+
+    // ── Service / Category Cards ────────────────────────────
     serviceCard: {
-        padding: 12,
-        marginBottom: 10,
-        borderRadius: 5,
-        border: '2 solid #e2e8f0',
-        backgroundColor: '#f8fafc'
+        paddingVertical: 5,
+        paddingHorizontal: 4,
+        marginBottom: 0,
+        borderBottom: '0.5 solid #e0e0e0'
     },
     serviceHeader: {
         flexDirection: 'row',
@@ -333,22 +340,23 @@ export const pdfStyles = StyleSheet.create({
         alignItems: 'flex-start'
     },
     categoryName: {
-        fontSize: 11,
+        fontSize: 9,
         fontWeight: 'bold',
-        color: '#0f172a',
-        marginBottom: 2
+        color: '#000000',
+        marginBottom: 1
     },
     categoryItems: {
         fontSize: 7,
-        color: '#64748b'
+        color: '#666666'
     },
     categoryRevenue: {
-        fontSize: 14,
-        fontWeight: 'bold'
+        fontSize: 10,
+        fontWeight: 'bold',
+        color: '#000000'
     },
     categoryPercentage: {
         fontSize: 7,
-        color: '#64748b',
-        marginTop: 2
+        color: '#666666',
+        marginTop: 1
     }
 });

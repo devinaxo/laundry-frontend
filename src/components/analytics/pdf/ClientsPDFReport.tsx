@@ -22,13 +22,6 @@ export const ClientsPDFReport: React.FC<ClientsPDFReportProps> = ({
     dateRange,
     limit
 }) => {
-    const getRankStyle = (rank: number) => {
-        if (rank === 1) return { backgroundColor: '#dbeafe', borderColor: '#93c5fd' };
-        if (rank === 2) return { backgroundColor: '#eff6ff', borderColor: '#bfdbfe' };
-        if (rank === 3) return { backgroundColor: '#f0f9ff', borderColor: '#e0f2fe' };
-        return { backgroundColor: '#f8fafc', borderColor: '#e2e8f0' };
-    };
-
     const formatSafeDate = (dateString: string, formatStr: string = "d 'de' MMM yyyy") => {
         try {
             const date = new Date(dateString);
@@ -47,65 +40,56 @@ export const ClientsPDFReport: React.FC<ClientsPDFReportProps> = ({
     return (
         <Document>
             <Page size="A4" style={pdfStyles.page}>
-                {/* Header */}
                 <View style={pdfStyles.header}>
                     <Text style={pdfStyles.title}>Reporte de Clientes</Text>
+                    <Text style={pdfStyles.subtitle}>Lavandería del 13</Text>
                     <Text style={pdfStyles.dateRange}>
-                        Período: {formatDate(dateRange.from)} - {formatDate(dateRange.to)}
+                        Período: {formatDate(dateRange.from)} — {formatDate(dateRange.to)}
                     </Text>
                 </View>
 
-                {/* Top Clients by Revenue */}
+                {/* Top Clients by Revenue — table layout */}
                 <View style={pdfStyles.section}>
                     <Text style={pdfStyles.sectionTitle}>Top {limit} Clientes por Ingresos</Text>
-                    {topClients.top_clients.map((client, index) => (
-                        <View 
-                            key={index} 
-                            style={[
-                                pdfStyles.clientCard,
-                                getRankStyle(client.rank)
-                            ]}
-                        >
-                            <View style={pdfStyles.clientHeader}>
-                                <View style={pdfStyles.rankBadge}>
-                                    <Text style={pdfStyles.rankNumber}>{client.rank}</Text>
-                                </View>
-                                <View style={{ flex: 1, marginLeft: 10 }}>
-                                    <Text style={pdfStyles.clientName}>{client.client_name}</Text>
-                                    <Text style={pdfStyles.clientPhone}>{client.phone}</Text>
-                                </View>
-                            </View>
-                            <View style={pdfStyles.clientMetricsGrid}>
-                                <View style={pdfStyles.clientMetric}>
-                                    <Text style={pdfStyles.clientMetricLabel}>Total Gastado</Text>
-                                    <Text style={[pdfStyles.clientMetricValue, { color: '#16a34a' }]}>
-                                        {formatCurrency(client.total_spent)}
-                                    </Text>
-                                </View>
-                                <View style={pdfStyles.clientMetric}>
-                                    <Text style={pdfStyles.clientMetricLabel}>Total Pedidos</Text>
-                                    <Text style={pdfStyles.clientMetricValue}>
-                                        {client.total_orders}
-                                    </Text>
-                                </View>
-                                <View style={pdfStyles.clientMetric}>
-                                    <Text style={pdfStyles.clientMetricLabel}>Promedio</Text>
-                                    <Text style={[pdfStyles.clientMetricValue, { color: '#2563eb' }]}>
-                                        {formatCurrency(client.average_order_value)}
-                                    </Text>
-                                </View>
-                            </View>
-                            <Text style={pdfStyles.clientFooter}>
-                                Último pedido: {formatSafeDate(client.last_delivery_date)}
-                            </Text>
+                    <View style={pdfStyles.dailyStatsTable}>
+                        <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
+                            <Text style={{ width: '6%', fontSize: 7 }}>#</Text>
+                            <Text style={{ width: '28%', fontSize: 7 }}>CLIENTE</Text>
+                            <Text style={{ width: '16%', fontSize: 7 }}>TELÉFONO</Text>
+                            <Text style={{ width: '16%', fontSize: 7, textAlign: 'right' }}>GASTADO</Text>
+                            <Text style={{ width: '12%', fontSize: 7, textAlign: 'center' }}>PEDIDOS</Text>
+                            <Text style={{ width: '14%', fontSize: 7, textAlign: 'right' }}>PROMEDIO</Text>
+                            <Text style={{ width: '8%', fontSize: 7 }}></Text>
                         </View>
-                    ))}
+                        {topClients.top_clients.map((client, index) => (
+                            <View key={index} style={pdfStyles.tableRow}>
+                                <Text style={[pdfStyles.tableCell, { width: '6%', fontWeight: 'bold' }]}>
+                                    {client.rank}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '28%', fontWeight: 'bold' }]}>
+                                    {client.client_name}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '16%' }]}>
+                                    {client.phone}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '16%', textAlign: 'right', fontWeight: 'bold' }]}>
+                                    {formatCurrency(client.total_spent)}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '12%', textAlign: 'center' }]}>
+                                    {client.total_orders}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '14%', textAlign: 'right' }]}>
+                                    {formatCurrency(client.average_order_value)}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '8%' }]}></Text>
+                            </View>
+                        ))}
+                    </View>
                     {topClients.top_clients.length === 0 && (
                         <Text style={pdfStyles.emptyMessage}>No hay clientes en el período seleccionado.</Text>
                     )}
                 </View>
 
-                {/* Footer */}
                 <Text style={pdfStyles.footer}>
                     Generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
                 </Text>
@@ -119,53 +103,42 @@ export const ClientsPDFReport: React.FC<ClientsPDFReportProps> = ({
 
                 <View style={pdfStyles.section}>
                     <Text style={pdfStyles.sectionTitle}>Top {limit} Clientes Frecuentes</Text>
-                    {frequentClients.frequent_clients.map((client, index) => (
-                        <View 
-                            key={index} 
-                            style={[
-                                pdfStyles.clientCard,
-                                getRankStyle(client.rank)
-                            ]}
-                        >
-                            <View style={pdfStyles.clientHeader}>
-                                <View style={pdfStyles.rankBadge}>
-                                    <Text style={pdfStyles.rankNumber}>{client.rank}</Text>
-                                </View>
-                                <View style={{ flex: 1, marginLeft: 10 }}>
-                                    <Text style={pdfStyles.clientName}>{client.client_name}</Text>
-                                    <Text style={pdfStyles.clientPhone}>{client.phone}</Text>
-                                </View>
-                            </View>
-                            <View style={pdfStyles.clientMetricsGrid}>
-                                <View style={pdfStyles.clientMetric}>
-                                    <Text style={pdfStyles.clientMetricLabel}>Total Pedidos</Text>
-                                    <Text style={[pdfStyles.clientMetricValue, { color: '#9333ea' }]}>
-                                        {client.total_orders}
-                                    </Text>
-                                </View>
-                                <View style={pdfStyles.clientMetric}>
-                                    <Text style={pdfStyles.clientMetricLabel}>Total Gastado</Text>
-                                    <Text style={[pdfStyles.clientMetricValue, { color: '#16a34a' }]}>
-                                        {formatCurrency(client.total_spent)}
-                                    </Text>
-                                </View>
-                                <View style={pdfStyles.clientMetric}>
-                                    <Text style={pdfStyles.clientMetricLabel}>Cliente desde</Text>
-                                    <Text style={pdfStyles.clientMetricValue}>
-                                        {Math.floor(client.customer_since_days)} días
-                                    </Text>
-                                </View>
-                            </View>
-                            <View style={pdfStyles.clientDateRange}>
-                                <Text style={pdfStyles.clientFooter}>
-                                    Primer pedido: {formatSafeDate(client.first_order_date, "d/MM/yyyy")}
-                                </Text>
-                                <Text style={pdfStyles.clientFooter}>
-                                    Último pedido: {formatSafeDate(client.last_order_date, "d/MM/yyyy")}
-                                </Text>
-                            </View>
+                    <View style={pdfStyles.dailyStatsTable}>
+                        <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
+                            <Text style={{ width: '6%', fontSize: 7 }}>#</Text>
+                            <Text style={{ width: '26%', fontSize: 7 }}>CLIENTE</Text>
+                            <Text style={{ width: '14%', fontSize: 7 }}>TELÉFONO</Text>
+                            <Text style={{ width: '12%', fontSize: 7, textAlign: 'center' }}>PEDIDOS</Text>
+                            <Text style={{ width: '14%', fontSize: 7, textAlign: 'right' }}>GASTADO</Text>
+                            <Text style={{ width: '14%', fontSize: 7, textAlign: 'center' }}>DESDE (DÍAS)</Text>
+                            <Text style={{ width: '14%', fontSize: 7, textAlign: 'right' }}>ÚLT. PEDIDO</Text>
                         </View>
-                    ))}
+                        {frequentClients.frequent_clients.map((client, index) => (
+                            <View key={index} style={pdfStyles.tableRow}>
+                                <Text style={[pdfStyles.tableCell, { width: '6%', fontWeight: 'bold' }]}>
+                                    {client.rank}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '26%', fontWeight: 'bold' }]}>
+                                    {client.client_name}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '14%' }]}>
+                                    {client.phone}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '12%', textAlign: 'center', fontWeight: 'bold' }]}>
+                                    {client.total_orders}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '14%', textAlign: 'right' }]}>
+                                    {formatCurrency(client.total_spent)}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '14%', textAlign: 'center' }]}>
+                                    {Math.floor(client.customer_since_days)}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '14%', textAlign: 'right' }]}>
+                                    {formatSafeDate(client.last_order_date, "d/MM/yyyy")}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
                     {frequentClients.frequent_clients.length === 0 && (
                         <Text style={pdfStyles.emptyMessage}>No hay clientes en el período seleccionado.</Text>
                     )}
@@ -177,13 +150,13 @@ export const ClientsPDFReport: React.FC<ClientsPDFReportProps> = ({
                     <View style={pdfStyles.summaryBox}>
                         <View style={pdfStyles.summaryRow}>
                             <Text style={pdfStyles.summaryLabel}>Ingresos Top {limit}:</Text>
-                            <Text style={[pdfStyles.summaryValue, { color: '#16a34a' }]}>
+                            <Text style={pdfStyles.summaryValue}>
                                 {formatCurrency(totalRevenueTop.toFixed(2))}
                             </Text>
                         </View>
                         <View style={pdfStyles.summaryRow}>
                             <Text style={pdfStyles.summaryLabel}>Pedidos Top {limit}:</Text>
-                            <Text style={[pdfStyles.summaryValue, { color: '#9333ea' }]}>
+                            <Text style={pdfStyles.summaryValue}>
                                 {totalOrdersFrequent}
                             </Text>
                         </View>

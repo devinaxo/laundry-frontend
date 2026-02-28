@@ -195,7 +195,7 @@ export const routes: RouteConfig[] = [
             {
                 path: '/new',
                 component: NewOrder,
-                title: 'Crear órden',
+                title: 'Crear orden',
                 icon: Plus,
                 showInSidebar: true,
                 requiresAuth: true,

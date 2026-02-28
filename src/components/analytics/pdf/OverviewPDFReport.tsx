@@ -30,11 +30,11 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
     return (
         <Document>
             <Page size="A4" style={pdfStyles.page}>
-                {/* Header */}
                 <View style={pdfStyles.header}>
                     <Text style={pdfStyles.title}>Reporte de Resumen Ejecutivo</Text>
+                    <Text style={pdfStyles.subtitle}>Lavandería del 13</Text>
                     <Text style={pdfStyles.dateRange}>
-                        Período: {formatDate(dateRange.from)} - {formatDate(dateRange.to)}
+                        Período: {formatDate(dateRange.from)} — {formatDate(dateRange.to)}
                     </Text>
                 </View>
 
@@ -50,11 +50,9 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
                             {overview.growth.orders_growth_percentage !== null && (
                                 <Text style={[
                                     pdfStyles.metricGrowth,
-                                    overview.growth.orders_growth_percentage > 0
+                                    overview.growth.orders_growth_percentage >= 0
                                         ? pdfStyles.growthPositive
-                                        : overview.growth.orders_growth_percentage < 0
-                                            ? pdfStyles.growthNegative
-                                            : pdfStyles.growthNeutral
+                                        : pdfStyles.growthNegative
                                 ]}>
                                     {formatPercentage(overview.growth.orders_growth_percentage)} vs. período anterior
                                 </Text>
@@ -69,11 +67,9 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
                             {overview.growth.revenue_growth_percentage !== null && (
                                 <Text style={[
                                     pdfStyles.metricGrowth,
-                                    overview.growth.revenue_growth_percentage > 0
+                                    overview.growth.revenue_growth_percentage >= 0
                                         ? pdfStyles.growthPositive
-                                        : overview.growth.revenue_growth_percentage < 0
-                                            ? pdfStyles.growthNegative
-                                            : pdfStyles.growthNeutral
+                                        : pdfStyles.growthNegative
                                 ]}>
                                     {formatPercentage(overview.growth.revenue_growth_percentage)} vs. período anterior
                                 </Text>
@@ -92,9 +88,6 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
                             <Text style={pdfStyles.metricValue}>
                                 {overview.metrics.unique_clients.toLocaleString('es-AR')}
                             </Text>
-                            <Text style={[pdfStyles.metricGrowth, pdfStyles.growthNeutral]}>
-                                clientes activos
-                            </Text>
                         </View>
                     </View>
                 </View>
@@ -103,19 +96,15 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
                 <View style={pdfStyles.section}>
                     <Text style={pdfStyles.sectionTitle}>Rango de Valores de Pedidos</Text>
                     <View style={pdfStyles.rangeContainer}>
-                        <View style={[pdfStyles.rangeCard, pdfStyles.rangeCardHigh]}>
-                            <Text style={[pdfStyles.rangeLabel, { color: '#16a34a' }]}>
-                                Pedido Más Alto
-                            </Text>
-                            <Text style={[pdfStyles.rangeValue, { color: '#16a34a' }]}>
+                        <View style={pdfStyles.rangeCard}>
+                            <Text style={pdfStyles.rangeLabel}>Pedido Más Alto</Text>
+                            <Text style={pdfStyles.rangeValue}>
                                 {formatCurrency(overview.metrics.highest_order)}
                             </Text>
                         </View>
-                        <View style={[pdfStyles.rangeCard, pdfStyles.rangeCardLow]}>
-                            <Text style={[pdfStyles.rangeLabel, { color: '#2563eb' }]}>
-                                Pedido Más Bajo
-                            </Text>
-                            <Text style={[pdfStyles.rangeValue, { color: '#2563eb' }]}>
+                        <View style={pdfStyles.rangeCard}>
+                            <Text style={pdfStyles.rangeLabel}>Pedido Más Bajo</Text>
+                            <Text style={pdfStyles.rangeValue}>
                                 {formatCurrency(overview.metrics.lowest_order)}
                             </Text>
                         </View>
@@ -165,7 +154,6 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
                     </View>
                 </View>
 
-                {/* Footer */}
                 <Text style={pdfStyles.footer}>
                     Generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
                 </Text>
@@ -201,7 +189,6 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
                             ))}
                         </View>
 
-                        {/* Daily Stats Summary */}
                         <View style={pdfStyles.summaryBox}>
                             <View style={pdfStyles.summaryRow}>
                                 <Text style={pdfStyles.summaryLabel}>Total de Días:</Text>

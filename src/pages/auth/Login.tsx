@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,7 @@ const Login: React.FC = () => {
     const { login, isLoading, isAuthenticated } = useAuth();
 
     if (isAuthenticated) {
-        window.location.href = '/';
+        return <Navigate to="/" replace />;
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
