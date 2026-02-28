@@ -260,7 +260,6 @@ export default function CategoriesList() {
             setIsLoading(true);
             setError(null);
             const categoriesData = await getCategoriesList();
-            console.log('Fetched categories:', categoriesData);
             setCategories(categoriesData);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al cargar categorías');

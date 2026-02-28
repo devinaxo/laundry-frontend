@@ -13,12 +13,12 @@ export const formatPercentage = (value: number | null) => {
 
 export const getStatusColor = (status: string) => {
     switch (status) {
-        case 'pending': return '#6b7280';
-        case 'in_progress': return '#eab308';
-        case 'ready': return '#3b82f6';
-        case 'delivered': return '#22c55e';
-        case 'cancelled': return '#ef4444';
-        default: return '#6b7280';
+        case 'pending': return '#78909c';
+        case 'in_progress': return '#f9a825';
+        case 'ready': return '#1565c0';
+        case 'delivered': return '#2e7d32';
+        case 'cancelled': return '#b71c1c';
+        default: return '#78909c';
     }
 };
 

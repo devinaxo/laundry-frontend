@@ -60,6 +60,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { statusColors, statusLabels } from '@/components/orders/statuses';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { formatDateOnly, formatDateTime } from '@/lib/utils';
 
 const columnHelper = createColumnHelper<Order>();
@@ -138,6 +139,8 @@ interface QuickStatusActionsProps {
 }
 
 function QuickStatusActions({ order, onStatusUpdate, updatingStatus = null }: QuickStatusActionsProps) {
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+
   const getAvailableActions = (currentStatus: Order['status']) => {
     switch (currentStatus) {
       case 'pending':
@@ -166,7 +169,16 @@ function QuickStatusActions({ order, onStatusUpdate, updatingStatus = null }: Qu
     return null;
   }
 
+  const handleStatusClick = (status: Order['status']) => {
+    if (status === 'cancelled') {
+      setCancelConfirmOpen(true);
+    } else {
+      onStatusUpdate(order, status);
+    }
+  };
+
   return (
+    <>
     <div className="flex flex-col gap-2 sm:flex-row sm:gap-1">
       {actions.map((action) => {
         const isThisButtonUpdating = updatingStatus === action.status;
@@ -177,7 +189,7 @@ function QuickStatusActions({ order, onStatusUpdate, updatingStatus = null }: Qu
             variant="ghost"
             className={`h-8 px-3 text-xs font-medium rounded-md transition-colors touch-manipulation ${isThisButtonUpdating ? 'opacity-50 cursor-not-allowed' : action.color
               } sm:h-6 sm:px-2`}
-            onClick={() => onStatusUpdate(order, action.status)}
+            onClick={() => handleStatusClick(action.status)}
             disabled={updatingStatus !== null}
             title={`Cambiar estado a ${action.label}`}
           >
@@ -190,6 +202,19 @@ function QuickStatusActions({ order, onStatusUpdate, updatingStatus = null }: Qu
         );
       })}
     </div>
+    <ConfirmDialog
+      open={cancelConfirmOpen}
+      onOpenChange={setCancelConfirmOpen}
+      title="Cancelar pedido"
+      description={`¿Estás seguro de que deseas cancelar el pedido ${order.order_number}? Esta acción puede deshacerse.`}
+      confirmLabel="Sí, cancelar pedido"
+      variant="destructive"
+      onConfirm={() => {
+        setCancelConfirmOpen(false);
+        onStatusUpdate(order, 'cancelled');
+      }}
+    />
+    </>
   );
 }
 
@@ -896,21 +921,37 @@ export default function OrdersList() {
           </Button>
 
           <div className="flex items-center gap-1">
-            {Array.from({ length: Math.min(5, paginationData.last_page) }, (_, i) => {
-              const page = i + 1;
-              return (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentPage(page)}
-                  disabled={isLoading}
-                  className="w-8 h-8 p-0"
-                >
-                  {page}
-                </Button>
-              );
-            })}
+            {(() => {
+              const totalPages = paginationData.last_page;
+              const maxVisible = 5;
+              let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+              let endPage = startPage + maxVisible - 1;
+              if (endPage > totalPages) {
+                endPage = totalPages;
+                startPage = Math.max(1, endPage - maxVisible + 1);
+              }
+              const pages = [];
+              if (startPage > 1) {
+                pages.push(
+                  <Button key={1} variant={currentPage === 1 ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(1)} disabled={isLoading} className="w-8 h-8 p-0">1</Button>
+                );
+                if (startPage > 2) pages.push(<span key="start-ellipsis" className="px-1 text-muted-foreground">...</span>);
+              }
+              for (let p = startPage; p <= endPage; p++) {
+                if (p === 1 && startPage > 1) continue;
+                if (p === totalPages && endPage < totalPages) continue;
+                pages.push(
+                  <Button key={p} variant={currentPage === p ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(p)} disabled={isLoading} className="w-8 h-8 p-0">{p}</Button>
+                );
+              }
+              if (endPage < totalPages) {
+                if (endPage < totalPages - 1) pages.push(<span key="end-ellipsis" className="px-1 text-muted-foreground">...</span>);
+                pages.push(
+                  <Button key={totalPages} variant={currentPage === totalPages ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(totalPages)} disabled={isLoading} className="w-8 h-8 p-0">{totalPages}</Button>
+                );
+              }
+              return pages;
+            })()}
           </div>
 
           <Button

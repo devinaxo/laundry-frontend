@@ -59,7 +59,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             setIsLoading(false);
             toast.success("Sesión iniciada correctamente");
-            window.location.href = '/';
             return true;
         } catch (error) {
             console.error('Login error:', error);
@@ -89,8 +88,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading,
         isAuthenticated: !!user,
     };
-    console.log('Current user:', user);
-
     return (
         <AuthContext.Provider value={value}>
             {children}

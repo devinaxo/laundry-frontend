@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ArrowUpDown, Search, Edit, UserX, UserCheck, MoreVertical, User, Mail, Calendar } from 'lucide-react';
 import EditUserModal from '@/components/users/EditUserModal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { toast } from 'sonner';
 import { useHasPermission } from '@/hooks/useHasPermission';
 import { useViewPreference } from '@/hooks/useViewPreference';
@@ -50,6 +51,7 @@ interface UserActionsProps {
 
 function UserActions({ user, onEditUser, onRefreshUsers }: UserActionsProps) {
     const [isUpdating, setIsUpdating] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
 
     const handleToggleUserStatus = async () => {
         setIsUpdating(true);
@@ -67,10 +69,12 @@ function UserActions({ user, onEditUser, onRefreshUsers }: UserActionsProps) {
             toast.error(`Error al ${user.active ? 'desactivar' : 'activar'} el usuario`);
         } finally {
             setIsUpdating(false);
+            setConfirmOpen(false);
         }
     };
 
     return (
+        <>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
@@ -95,7 +99,7 @@ function UserActions({ user, onEditUser, onRefreshUsers }: UserActionsProps) {
                     <span>Editar usuario</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    onClick={handleToggleUserStatus}
+                    onClick={() => setConfirmOpen(true)}
                     disabled={isUpdating}
                     className="cursor-pointer hover:bg-accent focus:bg-accent"
                 >
@@ -113,6 +117,20 @@ function UserActions({ user, onEditUser, onRefreshUsers }: UserActionsProps) {
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
+        <ConfirmDialog
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            title={user.active ? 'Desactivar usuario' : 'Activar usuario'}
+            description={user.active
+                ? `¿Estás seguro de que deseas desactivar al usuario "${user.name}"? No podrá acceder al sistema.`
+                : `¿Estás seguro de que deseas activar al usuario "${user.name}"?`
+            }
+            confirmLabel={user.active ? 'Desactivar' : 'Activar'}
+            variant={user.active ? 'destructive' : 'default'}
+            onConfirm={handleToggleUserStatus}
+            isLoading={isUpdating}
+        />
+        </>
     );
 }
 

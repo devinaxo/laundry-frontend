@@ -764,7 +764,7 @@ export default function EditOrderModal({ order, isOpen, onClose, onOrderUpdated 
                             Esta acción eliminará el comprobante de pago actual. Deberá cargar un nuevo comprobante antes de guardar los cambios.
                         </p>
                         <p className="text-sm font-medium text-amber-600">
-                            ⚠️ Esta acción no se puede deshacer.
+                            Esta acción no se puede deshacer.
                         </p>
                         <div className="flex justify-end gap-2 pt-4">
                             <Button

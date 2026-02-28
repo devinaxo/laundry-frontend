@@ -1,24 +1,18 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { parseISO, format } from "date-fns"
+import { es } from "date-fns/locale"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
 
 export const formatDateOnly = (dateString: string) => {
-	return new Date(dateString).toLocaleDateString('es-ES', {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
-	});
+	const date = parseISO(dateString);
+	return format(date, "d 'de' MMM yyyy", { locale: es });
 };
 
 export const formatDateTime = (dateString: string) => {
-	return new Date(dateString).toLocaleDateString('es-ES', {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-	});
+	const date = parseISO(dateString);
+	return format(date, "d 'de' MMM yyyy, HH:mm", { locale: es });
 };

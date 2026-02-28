@@ -24,36 +24,23 @@ export const TrendsPDFReport: React.FC<TrendsPDFReportProps> = ({
         return formatPercentage(growth);
     };
 
-    const getMaxValue = (data: OrdersPerMonth['data']) => {
-        return Math.max(...data.map(d => d.total_orders));
-    };
-
-    const getMaxRevenue = (data: OrdersPerMonth['data']) => {
-        return Math.max(...data.map(d => parseFloat(d.total_revenue)));
-    };
-
-    const maxOrders = getMaxValue(monthlyData.data);
-    const maxRevenue = getMaxRevenue(monthlyData.data);
-
     return (
         <Document>
             <Page size="A4" style={pdfStyles.page}>
-                {/* Header */}
                 <View style={pdfStyles.header}>
                     <Text style={pdfStyles.title}>Reporte de Tendencias</Text>
-                    <Text style={pdfStyles.dateRange}>
-                        Año: {selectedYear}
-                    </Text>
+                    <Text style={pdfStyles.subtitle}>Lavandería del 13</Text>
+                    <Text style={pdfStyles.dateRange}>Año: {selectedYear}</Text>
                 </View>
 
-                {/* Monthly Orders */}
+                {/* Monthly Orders & Revenue in a single table */}
                 <View style={pdfStyles.section}>
-                    <Text style={pdfStyles.sectionTitle}>Pedidos por Mes</Text>
+                    <Text style={pdfStyles.sectionTitle}>Pedidos e Ingresos por Mes</Text>
                     <View style={pdfStyles.dailyStatsTable}>
                         <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
                             <Text style={pdfStyles.tableCellDate}>MES</Text>
                             <Text style={pdfStyles.tableCellOrders}>PEDIDOS</Text>
-                            <Text style={pdfStyles.tableCellRevenue}>PROPORCIÓN</Text>
+                            <Text style={pdfStyles.tableCellRevenue}>INGRESOS</Text>
                         </View>
                         {monthlyData.data.map((month, index) => (
                             <View key={index} style={pdfStyles.tableRow}>
@@ -64,62 +51,13 @@ export const TrendsPDFReport: React.FC<TrendsPDFReportProps> = ({
                                     {month.total_orders}
                                 </Text>
                                 <Text style={[pdfStyles.tableCell, pdfStyles.tableCellRevenue]}>
-                                    <View style={[pdfStyles.progressBarContainer]}>
-                                        <View 
-                                            style={[
-                                                pdfStyles.progressBarFill,
-                                                { 
-                                                    width: `${(month.total_orders / maxOrders) * 100}%`,
-                                                    backgroundColor: '#3b82f6'
-                                                }
-                                            ]} 
-                                        />
-                                    </View>
+                                    {formatCurrency(month.total_revenue)}
                                 </Text>
                             </View>
                         ))}
                     </View>
                 </View>
 
-                {/* Monthly Revenue */}
-                <View style={pdfStyles.section} break>
-                    <Text style={pdfStyles.sectionTitle}>Ingresos por Mes</Text>
-                    <View style={pdfStyles.dailyStatsTable}>
-                        <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
-                            <Text style={pdfStyles.tableCellDate}>MES</Text>
-                            <Text style={pdfStyles.tableCellOrders}>INGRESOS</Text>
-                            <Text style={pdfStyles.tableCellRevenue}>PROPORCIÓN</Text>
-                        </View>
-                        {monthlyData.data.map((month, index) => {
-                            const revenue = parseFloat(month.total_revenue);
-                            return (
-                                <View key={index} style={pdfStyles.tableRow}>
-                                    <Text style={[pdfStyles.tableCell, pdfStyles.tableCellDate]}>
-                                        {month.month_short}
-                                    </Text>
-                                    <Text style={[pdfStyles.tableCell, pdfStyles.tableCellOrders]}>
-                                        {formatCurrency(month.total_revenue)}
-                                    </Text>
-                                    <Text style={[pdfStyles.tableCell, pdfStyles.tableCellRevenue]}>
-                                        <View style={[pdfStyles.progressBarContainer]}>
-                                            <View 
-                                                style={[
-                                                    pdfStyles.progressBarFill,
-                                                    { 
-                                                        width: `${(revenue / maxRevenue) * 100}%`,
-                                                        backgroundColor: '#22c55e'
-                                                    }
-                                                ]} 
-                                            />
-                                        </View>
-                                    </Text>
-                                </View>
-                            );
-                        })}
-                    </View>
-                </View>
-
-                {/* Footer */}
                 <Text style={pdfStyles.footer}>
                     Generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
                 </Text>
@@ -133,24 +71,23 @@ export const TrendsPDFReport: React.FC<TrendsPDFReportProps> = ({
 
                 <View style={pdfStyles.section}>
                     <Text style={pdfStyles.sectionTitle}>Métricas por Año</Text>
-                    <View style={pdfStyles.metricsGrid}>
+                    <View style={pdfStyles.dailyStatsTable}>
+                        <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
+                            <Text style={pdfStyles.tableCellDate}>AÑO</Text>
+                            <Text style={pdfStyles.tableCellOrders}>PEDIDOS</Text>
+                            <Text style={pdfStyles.tableCellRevenue}>INGRESOS</Text>
+                        </View>
                         {yearlyComparison.comparison.map((yearData, index) => (
-                            <View key={index} style={pdfStyles.yearComparisonCard}>
-                                <Text style={pdfStyles.yearTitle}>{yearData.year}</Text>
-                                <View style={{ marginTop: 10 }}>
-                                    <View style={pdfStyles.yearMetricRow}>
-                                        <Text style={pdfStyles.yearMetricLabel}>Total Pedidos:</Text>
-                                        <Text style={pdfStyles.yearMetricValue}>{yearData.total_orders}</Text>
-                                    </View>
-                                    <View style={pdfStyles.yearMetricRow}>
-                                        <Text style={pdfStyles.yearMetricLabel}>Ingresos Totales:</Text>
-                                        <Text style={pdfStyles.yearMetricValue}>{formatCurrency(yearData.total_revenue)}</Text>
-                                    </View>
-                                    <View style={pdfStyles.yearMetricRow}>
-                                        <Text style={pdfStyles.yearMetricLabel}>Valor Promedio:</Text>
-                                        <Text style={pdfStyles.yearMetricValue}>{formatCurrency(yearData.average_order_value)}</Text>
-                                    </View>
-                                </View>
+                            <View key={index} style={pdfStyles.tableRow}>
+                                <Text style={[pdfStyles.tableCell, pdfStyles.tableCellDate, { fontWeight: 'bold' }]}>
+                                    {yearData.year}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, pdfStyles.tableCellOrders]}>
+                                    {yearData.total_orders}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, pdfStyles.tableCellRevenue]}>
+                                    {formatCurrency(yearData.total_revenue)}
+                                </Text>
                             </View>
                         ))}
                     </View>
@@ -159,24 +96,24 @@ export const TrendsPDFReport: React.FC<TrendsPDFReportProps> = ({
                 {yearlyComparison.comparison.length === 2 && yearlyComparison.growth && (
                     <View style={pdfStyles.section}>
                         <Text style={pdfStyles.sectionTitle}>
-                            Crecimiento ({yearlyComparison.growth.from_year} - {yearlyComparison.growth.to_year})
+                            Crecimiento ({yearlyComparison.growth.from_year} — {yearlyComparison.growth.to_year})
                         </Text>
-                        <View style={pdfStyles.metricsGrid}>
-                            <View style={[pdfStyles.metricCard, { backgroundColor: '#dbeafe' }]}>
-                                <Text style={pdfStyles.metricLabel}>Pedidos</Text>
-                                <Text style={[pdfStyles.metricValue, { color: '#2563eb' }]}>
+                        <View style={pdfStyles.summaryBox}>
+                            <View style={pdfStyles.summaryRow}>
+                                <Text style={pdfStyles.summaryLabel}>Pedidos:</Text>
+                                <Text style={pdfStyles.summaryValue}>
                                     {formatGrowth(yearlyComparison.growth.orders_growth_percentage)}
                                 </Text>
                             </View>
-                            <View style={[pdfStyles.metricCard, { backgroundColor: '#dcfce7' }]}>
-                                <Text style={pdfStyles.metricLabel}>Ingresos</Text>
-                                <Text style={[pdfStyles.metricValue, { color: '#16a34a' }]}>
+                            <View style={pdfStyles.summaryRow}>
+                                <Text style={pdfStyles.summaryLabel}>Ingresos:</Text>
+                                <Text style={pdfStyles.summaryValue}>
                                     {formatGrowth(yearlyComparison.growth.revenue_growth_percentage)}
                                 </Text>
                             </View>
-                            <View style={[pdfStyles.metricCard, { backgroundColor: '#f3e8ff' }]}>
-                                <Text style={pdfStyles.metricLabel}>Valor Promedio</Text>
-                                <Text style={[pdfStyles.metricValue, { color: '#9333ea' }]}>
+                            <View style={pdfStyles.summaryRow}>
+                                <Text style={pdfStyles.summaryLabel}>Valor Promedio:</Text>
+                                <Text style={pdfStyles.summaryValue}>
                                     {formatGrowth(yearlyComparison.growth.average_value_growth_percentage)}
                                 </Text>
                             </View>
@@ -188,15 +125,11 @@ export const TrendsPDFReport: React.FC<TrendsPDFReportProps> = ({
                 <View style={pdfStyles.summaryBox}>
                     <View style={pdfStyles.summaryRow}>
                         <Text style={pdfStyles.summaryLabel}>Total Meses Analizados:</Text>
-                        <Text style={pdfStyles.summaryValue}>
-                            {monthlyData.data.length}
-                        </Text>
+                        <Text style={pdfStyles.summaryValue}>{monthlyData.data.length}</Text>
                     </View>
                     <View style={pdfStyles.summaryRow}>
                         <Text style={pdfStyles.summaryLabel}>Año Seleccionado:</Text>
-                        <Text style={pdfStyles.summaryValue}>
-                            {selectedYear}
-                        </Text>
+                        <Text style={pdfStyles.summaryValue}>{selectedYear}</Text>
                     </View>
                 </View>
 

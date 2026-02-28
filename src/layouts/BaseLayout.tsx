@@ -38,6 +38,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { RouteConfig } from '@/config/routes';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { Separator } from '@/components/ui/separator';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -47,6 +48,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  usePageTitle();
   const navigationItems = getSidebarRoutes();
   const allRoutes = getAllRoutes().filter(r => r.showInSidebar);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());

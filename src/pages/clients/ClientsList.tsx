@@ -39,6 +39,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import ClientMapModal from '@/components/clients/ClientMapModal';
 import EditClientModal from '@/components/clients/EditClientModal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { formatDateTime } from '@/lib/utils';
 
 const columnHelper = createColumnHelper<Client>();
@@ -51,6 +52,7 @@ interface ClientActionsProps {
 
 function ClientActions({ client, onEditClient, onRefreshClients }: ClientActionsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleToggleClientStatus = async () => {
     setIsUpdating(true);
@@ -68,10 +70,12 @@ function ClientActions({ client, onEditClient, onRefreshClients }: ClientActions
       toast.error(`Error al ${client.active ? 'desactivar' : 'activar'} el cliente`);
     } finally {
       setIsUpdating(false);
+      setConfirmOpen(false);
     }
   };
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -96,7 +100,7 @@ function ClientActions({ client, onEditClient, onRefreshClients }: ClientActions
           <span>Editar cliente</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={handleToggleClientStatus}
+          onClick={() => setConfirmOpen(true)}
           disabled={isUpdating}
           className="cursor-pointer hover:bg-accent focus:bg-accent"
         >
@@ -114,6 +118,20 @@ function ClientActions({ client, onEditClient, onRefreshClients }: ClientActions
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={client.active ? 'Desactivar cliente' : 'Activar cliente'}
+        description={client.active
+            ? `¿Estás seguro de que deseas desactivar al cliente "${client.forename} ${client.surname}"?`
+            : `¿Estás seguro de que deseas activar al cliente "${client.forename} ${client.surname}"?`
+        }
+        confirmLabel={client.active ? 'Desactivar' : 'Activar'}
+        variant={client.active ? 'destructive' : 'default'}
+        onConfirm={handleToggleClientStatus}
+        isLoading={isUpdating}
+    />
+    </>
   );
 }
 
@@ -416,7 +434,6 @@ export default function ClientsList() {
   useEffect(() => {
     fetchClients();
   }, [fetchClients]);
-  console.log(clients)
 
   if (error) {
     return (
@@ -646,21 +663,37 @@ export default function ClientsList() {
           </Button>
 
           <div className="flex items-center gap-1">
-            {Array.from({ length: Math.min(5, paginationData.last_page) }, (_, i) => {
-              const page = i + 1;
-              return (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentPage(page)}
-                  disabled={isLoading}
-                  className="w-8 h-8 p-0"
-                >
-                  {page}
-                </Button>
-              );
-            })}
+            {(() => {
+              const totalPages = paginationData.last_page;
+              const maxVisible = 5;
+              let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+              let endPage = startPage + maxVisible - 1;
+              if (endPage > totalPages) {
+                endPage = totalPages;
+                startPage = Math.max(1, endPage - maxVisible + 1);
+              }
+              const pages = [];
+              if (startPage > 1) {
+                pages.push(
+                  <Button key={1} variant={currentPage === 1 ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(1)} disabled={isLoading} className="w-8 h-8 p-0">1</Button>
+                );
+                if (startPage > 2) pages.push(<span key="start-ellipsis" className="px-1 text-muted-foreground">...</span>);
+              }
+              for (let p = startPage; p <= endPage; p++) {
+                if (p === 1 && startPage > 1) continue;
+                if (p === totalPages && endPage < totalPages) continue;
+                pages.push(
+                  <Button key={p} variant={currentPage === p ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(p)} disabled={isLoading} className="w-8 h-8 p-0">{p}</Button>
+                );
+              }
+              if (endPage < totalPages) {
+                if (endPage < totalPages - 1) pages.push(<span key="end-ellipsis" className="px-1 text-muted-foreground">...</span>);
+                pages.push(
+                  <Button key={totalPages} variant={currentPage === totalPages ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(totalPages)} disabled={isLoading} className="w-8 h-8 p-0">{totalPages}</Button>
+                );
+              }
+              return pages;
+            })()}
           </div>
 
           <Button

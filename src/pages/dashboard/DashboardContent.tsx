@@ -29,6 +29,8 @@ const Dashboard: React.FC = () => {
   const [orderDetailsModalOpen, setOrderDetailsModalOpen] = useState(false);
 
   const canViewOrders = useHasPermission(Permission.VIEW_ORDERS);
+  const canCreateOrders = useHasPermission(Permission.CREATE_ORDERS);
+  const canCreateClients = useHasPermission(Permission.CREATE_CLIENTS);
 
   const handleViewOrderDetails = (order: RecentOrder) => {
     setSelectedOrderForDetails(order);
@@ -203,6 +205,7 @@ const Dashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
+                  {canCreateOrders && (
                   <button
                     onClick={() => navigate('/orders/new?from=dashboard')}
                     className="w-full text-left p-3 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
@@ -215,6 +218,8 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </button>
+                  )}
+                  {canViewOrders && (
                   <button
                     onClick={() => navigate('/orders/list')}
                     className="w-full text-left p-3 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
@@ -227,6 +232,8 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </button>
+                  )}
+                  {canCreateClients && (
                   <button
                     onClick={() => navigate('/clients/new?from=dashboard')}
                     className="w-full text-left p-3 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
@@ -239,6 +246,12 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
                   </button>
+                  )}
+                  {!canCreateOrders && !canViewOrders && !canCreateClients && (
+                    <p className="text-sm text-muted-foreground text-center py-2">
+                      No tienes permisos para realizar acciones rápidas.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

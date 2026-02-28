@@ -277,7 +277,6 @@ export default function SubcategoriesList() {
             setIsLoading(true);
             setError(null);
             const subcategoriesData = await getSubcategoriesList();
-            console.log('Fetched subcategories:', subcategoriesData);
             setSubcategories(subcategoriesData);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al cargar subcategorías');

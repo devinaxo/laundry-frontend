@@ -22,22 +22,17 @@ export const ServicesPDFReport: React.FC<ServicesPDFReportProps> = ({
     dateRange,
     limit
 }) => {
-    const getCategoryColor = (index: number) => {
-        const colors = ['#3b82f6', '#22c55e', '#9333ea', '#f97316', '#ec4899'];
-        return colors[index % colors.length];
-    };
-
     const totalRevenue = categoryRevenue.categories.reduce((sum, cat) => sum + parseFloat(cat.total_revenue), 0);
-    const totalItems = popularServices.popular_services.reduce((sum, service) => sum + (Number(service.total_quantity) || 0), 0)
+    const totalItems = popularServices.popular_services.reduce((sum, service) => sum + (Number(service.total_quantity) || 0), 0);
 
     return (
         <Document>
             <Page size="A4" style={pdfStyles.page}>
-                {/* Header */}
                 <View style={pdfStyles.header}>
                     <Text style={pdfStyles.title}>Reporte de Servicios</Text>
+                    <Text style={pdfStyles.subtitle}>Lavandería del 13</Text>
                     <Text style={pdfStyles.dateRange}>
-                        Período: {formatDate(dateRange.from)} - {formatDate(dateRange.to)}
+                        Período: {formatDate(dateRange.from)} — {formatDate(dateRange.to)}
                     </Text>
                 </View>
 
@@ -46,54 +41,37 @@ export const ServicesPDFReport: React.FC<ServicesPDFReportProps> = ({
                     <Text style={pdfStyles.sectionTitle}>Top {limit} Servicios Más Populares</Text>
                     <View style={pdfStyles.dailyStatsTable}>
                         <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
-                            <Text style={{ width: '8%', fontSize: 9 }}>#</Text>
-                            <Text style={{ width: '42%', fontSize: 9 }}>SERVICIO</Text>
-                            <Text style={{ width: '20%', fontSize: 9, textAlign: 'center' }}>CANTIDAD</Text>
-                            <Text style={{ width: '15%', fontSize: 9, textAlign: 'center' }}>PEDIDOS</Text>
-                            <Text style={{ width: '15%', fontSize: 9, textAlign: 'right' }}>INGRESOS</Text>
+                            <Text style={{ width: '6%', fontSize: 7 }}>#</Text>
+                            <Text style={{ width: '40%', fontSize: 7 }}>SERVICIO</Text>
+                            <Text style={{ width: '18%', fontSize: 7, textAlign: 'center' }}>CANTIDAD</Text>
+                            <Text style={{ width: '18%', fontSize: 7, textAlign: 'center' }}>PEDIDOS</Text>
+                            <Text style={{ width: '18%', fontSize: 7, textAlign: 'right' }}>INGRESOS</Text>
                         </View>
-                        {popularServices.popular_services.map((service, index) => {
-                            // const percentage = (service.total_quantity / maxServiceCount) * 100;
-                            return (
-                                <View key={index} style={pdfStyles.tableRow}>
-                                    <Text style={[pdfStyles.tableCell, { width: '8%', fontWeight: 'bold', color: '#2563eb' }]}>
-                                        {index + 1}
-                                    </Text>
-                                    <View style={{ width: '42%' }}>
-                                        <Text style={[pdfStyles.tableCell, { fontSize: 8, fontWeight: 'bold' }]}>
-                                            {service.category_name} - {service.service_name}
-                                        </Text>
-                                        {/* <View style={[pdfStyles.progressBarContainer, { marginTop: 2, height: 6 }]}>
-                                            <View 
-                                                style={[
-                                                    pdfStyles.progressBarFill,
-                                                    { 
-                                                        width: `${percentage}%`,
-                                                        backgroundColor: '#3b82f6'
-                                                    }
-                                                ]} 
-                                            />
-                                        </View> */}
-                                    </View>
-                                    <Text style={[pdfStyles.tableCell, { width: '20%', textAlign: 'center', fontWeight: 'bold' }]}>
-                                        {service.total_quantity}
-                                    </Text>
-                                    <Text style={[pdfStyles.tableCell, { width: '15%', textAlign: 'center' }]}>
-                                        {service.times_ordered}
-                                    </Text>
-                                    <Text style={[pdfStyles.tableCell, { width: '15%', textAlign: 'right' }]}>
-                                        {formatCurrency(service.total_revenue)}
-                                    </Text>
-                                </View>
-                            );
-                        })}
+                        {popularServices.popular_services.map((service, index) => (
+                            <View key={index} style={pdfStyles.tableRow}>
+                                <Text style={[pdfStyles.tableCell, { width: '6%', fontWeight: 'bold' }]}>
+                                    {index + 1}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '40%' }]}>
+                                    {service.category_name} — {service.service_name}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '18%', textAlign: 'center', fontWeight: 'bold' }]}>
+                                    {service.total_quantity}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '18%', textAlign: 'center' }]}>
+                                    {service.times_ordered}
+                                </Text>
+                                <Text style={[pdfStyles.tableCell, { width: '18%', textAlign: 'right' }]}>
+                                    {formatCurrency(service.total_revenue)}
+                                </Text>
+                            </View>
+                        ))}
                     </View>
                     {popularServices.popular_services.length === 0 && (
                         <Text style={pdfStyles.emptyMessage}>No hay servicios en el período seleccionado.</Text>
                     )}
                 </View>
 
-                {/* Footer */}
                 <Text style={pdfStyles.footer}>
                     Generado el {format(new Date(), "d 'de' MMMM 'de' yyyy 'a las' HH:mm", { locale: es })}
                 </Text>
@@ -107,40 +85,36 @@ export const ServicesPDFReport: React.FC<ServicesPDFReportProps> = ({
 
                 <View style={pdfStyles.section}>
                     <Text style={pdfStyles.sectionTitle}>Categorías</Text>
-                    {categoryRevenue.categories.map((category, index) => {
-                        const revenuePercentage = (parseFloat(category.total_revenue) / totalRevenue) * 100;
-                        const color = getCategoryColor(index);
+                    <View style={pdfStyles.dailyStatsTable}>
+                        <View style={[pdfStyles.tableRow, pdfStyles.tableHeader]}>
+                            <Text style={{ width: '40%', fontSize: 7 }}>CATEGORÍA</Text>
+                            <Text style={{ width: '15%', fontSize: 7, textAlign: 'center' }}>ITEMS</Text>
+                            <Text style={{ width: '25%', fontSize: 7, textAlign: 'right' }}>INGRESOS</Text>
+                            <Text style={{ width: '20%', fontSize: 7, textAlign: 'right' }}>% DEL TOTAL</Text>
+                        </View>
+                        {categoryRevenue.categories.map((category, index) => {
+                            const revenuePercentage = totalRevenue > 0
+                                ? (parseFloat(category.total_revenue) / totalRevenue) * 100
+                                : 0;
 
-                        return (
-                            <View key={index} style={[pdfStyles.serviceCard, { borderColor: color }]}>
-                                <View style={pdfStyles.serviceHeader}>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={pdfStyles.categoryName}>{category.category_name}</Text>
-                                        <Text style={pdfStyles.categoryItems}>{category.total_items} items</Text>
-                                    </View>
-                                    <View style={{ alignItems: 'flex-end' }}>
-                                        <Text style={[pdfStyles.categoryRevenue, { color }]}>
-                                            {formatCurrency(category.total_revenue)}
-                                        </Text>
-                                        <Text style={pdfStyles.categoryPercentage}>
-                                            {revenuePercentage.toFixed(1)}% del total
-                                        </Text>
-                                    </View>
+                            return (
+                                <View key={index} style={pdfStyles.tableRow}>
+                                    <Text style={[pdfStyles.tableCell, { width: '40%', fontWeight: 'bold' }]}>
+                                        {category.category_name}
+                                    </Text>
+                                    <Text style={[pdfStyles.tableCell, { width: '15%', textAlign: 'center' }]}>
+                                        {category.total_items}
+                                    </Text>
+                                    <Text style={[pdfStyles.tableCell, { width: '25%', textAlign: 'right', fontWeight: 'bold' }]}>
+                                        {formatCurrency(category.total_revenue)}
+                                    </Text>
+                                    <Text style={[pdfStyles.tableCell, { width: '20%', textAlign: 'right' }]}>
+                                        {revenuePercentage.toFixed(1)}%
+                                    </Text>
                                 </View>
-                                <View style={[pdfStyles.progressBarContainer, { marginTop: 8 }]}>
-                                    <View 
-                                        style={[
-                                            pdfStyles.progressBarFill,
-                                            { 
-                                                width: `${revenuePercentage}%`,
-                                                backgroundColor: color
-                                            }
-                                        ]} 
-                                    />
-                                </View>
-                            </View>
-                        );
-                    })}
+                            );
+                        })}
+                    </View>
                     {categoryRevenue.categories.length === 0 && (
                         <Text style={pdfStyles.emptyMessage}>No hay categorías con ingresos en el período seleccionado.</Text>
                     )}
@@ -149,24 +123,18 @@ export const ServicesPDFReport: React.FC<ServicesPDFReportProps> = ({
                 {/* Summary */}
                 <View style={pdfStyles.section}>
                     <Text style={pdfStyles.sectionTitle}>Resumen</Text>
-                    <View style={pdfStyles.metricsGrid}>
-                        <View style={[pdfStyles.metricCard, { backgroundColor: '#dbeafe' }]}>
-                            <Text style={pdfStyles.metricLabel}>Total de Artículos</Text>
-                            <Text style={[pdfStyles.metricValue, { color: '#2563eb' }]}>
-                                {totalItems}
-                            </Text>
+                    <View style={pdfStyles.summaryBox}>
+                        <View style={pdfStyles.summaryRow}>
+                            <Text style={pdfStyles.summaryLabel}>Total de Artículos:</Text>
+                            <Text style={pdfStyles.summaryValue}>{totalItems}</Text>
                         </View>
-                        <View style={[pdfStyles.metricCard, { backgroundColor: '#dcfce7' }]}>
-                            <Text style={pdfStyles.metricLabel}>Ingresos Totales</Text>
-                            <Text style={[pdfStyles.metricValue, { color: '#16a34a' }]}>
-                                {formatCurrency(totalRevenue.toFixed(2))}
-                            </Text>
+                        <View style={pdfStyles.summaryRow}>
+                            <Text style={pdfStyles.summaryLabel}>Ingresos Totales:</Text>
+                            <Text style={pdfStyles.summaryValue}>{formatCurrency(totalRevenue.toFixed(2))}</Text>
                         </View>
-                        <View style={[pdfStyles.metricCard, { backgroundColor: '#f3e8ff' }]}>
-                            <Text style={pdfStyles.metricLabel}>Categorías Activas</Text>
-                            <Text style={[pdfStyles.metricValue, { color: '#9333ea' }]}>
-                                {categoryRevenue.categories.length}
-                            </Text>
+                        <View style={pdfStyles.summaryRow}>
+                            <Text style={pdfStyles.summaryLabel}>Categorías Activas:</Text>
+                            <Text style={pdfStyles.summaryValue}>{categoryRevenue.categories.length}</Text>
                         </View>
                     </View>
                 </View>
