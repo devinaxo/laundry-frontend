@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getCategoryRevenue, getPopularServices } from '@/api/getFetches';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/shadcn-io/spinner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shirt, Award, TrendingUp, Package, ListOrdered, FileText } from 'lucide-react';
-import { toast } from 'sonner';
-import { getPopularServices, getCategoryRevenue } from '@/api/getFetches';
-import type { PopularServicesResponse, CategoryRevenueResponse } from '@/types/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
-import type { DateRange } from 'react-day-picker';
+import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import type { CategoryRevenueResponse, PopularServicesResponse } from '@/types/api';
+import { FilePdfIcon } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
+import { Award, ListOrdered, Package, Shirt, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
+import { toast } from 'sonner';
 import { ServicesPDFReport } from './pdf/ServicesPDFReport';
-import { FilePdfIcon } from '@phosphor-icons/react';
 
 const ServicesTab: React.FC = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
