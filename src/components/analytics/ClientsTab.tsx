@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trophy, Users, Phone, Clock, DollarSign, ListOrdered, FileText } from 'lucide-react';
+import { FilePdfIcon } from "@phosphor-icons/react";
 import { toast } from 'sonner';
 import { getTopClients, getFrequentClients } from '@/api/getFetches';
 import type { TopClientsResponse, FrequentClientsResponse } from '@/types/api';
@@ -35,7 +36,7 @@ const ClientsTab: React.FC = () => {
                 onClick={() => setShowPDFModal(true)}
                 className="gap-2"
               >
-                <FileText className="h-4 w-4" />
+                <FilePdfIcon className="h-4 w-4" />
                 Generar PDF
               </Button>
             )}

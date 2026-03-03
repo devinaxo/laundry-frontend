@@ -24,6 +24,7 @@ export interface DateRangePickerProps {
     date?: DateRange;
     onDateChange?: (date: DateRange | undefined) => void;
     className?: string;
+    noDefaultDate?: boolean;
 }
 
 type PresetRange = "today" | "yesterday" | "last7days" | "last30days" | "thisMonth" | "lastMonth" | "thisYear" | "custom";
@@ -80,19 +81,20 @@ export function DateRangePicker({
     date,
     onDateChange,
     className,
+    noDefaultDate = false,
 }: DateRangePickerProps) {
-    const [selectedPreset, setSelectedPreset] = React.useState<PresetRange>("thisMonth");
+    const [selectedPreset, setSelectedPreset] = React.useState<PresetRange>(noDefaultDate ? "custom" : "thisMonth");
     const [initialized, setInitialized] = React.useState(false);
 
     React.useEffect(() => {
-        if (!initialized && !date) {
+        if (!noDefaultDate && !initialized && !date) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
             onDateChange?.({ from: firstDay, to: today });
             setInitialized(true);
         }
-    }, [initialized, date, onDateChange]);
+    }, [noDefaultDate, initialized, date, onDateChange]);
 
     const handlePresetChange = (preset: PresetRange) => {
         setSelectedPreset(preset);

@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
 import { ServicesPDFReport } from './pdf/ServicesPDFReport';
+import { FilePdfIcon } from '@phosphor-icons/react';
 
 const ServicesTab: React.FC = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -35,7 +36,7 @@ const ServicesTab: React.FC = () => {
                 onClick={() => setShowPDFModal(true)}
                 className="gap-2"
               >
-                <FileText className="h-4 w-4" />
+                <FilePdfIcon className="h-4 w-4" />
                 Generar PDF
               </Button>
             )}

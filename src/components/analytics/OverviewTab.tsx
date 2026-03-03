@@ -14,6 +14,7 @@ import { es } from 'date-fns/locale';
 import { ZoomableChart } from '@/components/ui/zoomableChart';
 import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
 import { OverviewPDFReport } from './pdf/OverviewPDFReport';
+import { FilePdfIcon } from '@phosphor-icons/react';
 
 const OverviewTab: React.FC = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -35,7 +36,7 @@ const OverviewTab: React.FC = () => {
                 onClick={() => setShowPDFModal(true)}
                 className="gap-2"
               >
-                <FileText className="h-4 w-4" />
+                <FilePdfIcon className="h-4 w-4" />
                 Generar PDF
               </Button>
             )}
