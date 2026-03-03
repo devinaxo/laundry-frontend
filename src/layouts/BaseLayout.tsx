@@ -16,7 +16,13 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   CommandDialog,
   CommandEmpty,
@@ -36,6 +42,7 @@ import { ModeToggle } from '@/components/ui/mode-toggle';
 import { getSidebarRoutes, getAllRoutes } from '@/config/routes';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { RouteConfig } from '@/config/routes';
+import { cn } from '@/lib/utils';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { Separator } from '@/components/ui/separator';
 import { usePageTitle } from '@/hooks/usePageTitle';
@@ -44,14 +51,128 @@ interface BaseLayoutProps {
   children: React.ReactNode;
 }
 
+// Self-contained menu item — uses hooks so it must be a proper component
+const MenuItem: React.FC<{ item: RouteConfig }> = ({ item }) => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const { state } = useSidebar();
+  const [expanded, setExpanded] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const hasPermission = (permissions: string[]): boolean => {
+    if (!permissions || permissions.length === 0) return true;
+    if (!user?.role?.permissions) return false;
+    return permissions.every(required =>
+      user.role.permissions?.some(p => p.name === required)
+    );
+  };
+
+  if (!hasPermission(item.permissions)) return null;
+
+  const hasChildren = item.isParent && item.children && item.children.length > 0;
+  const isActive = hasChildren
+    ? location.pathname.startsWith(item.path)
+    : location.pathname === item.path;
+  const isCollapsed = state === 'collapsed';
+
+  // Collapsed sidebar + parent with children → flyout popover
+  if (isCollapsed && hasChildren) {
+    return (
+      <SidebarMenuItem>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger asChild>
+            <SidebarMenuButton
+              isActive={isActive}
+              className="transition-all duration-300 ease-in-out"
+            >
+              <item.icon className="h-4 w-4" />
+            </SidebarMenuButton>
+          </PopoverTrigger>
+          <PopoverContent side="right" align="start" sideOffset={8} className="w-52 p-1.5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 px-2 py-1">
+              {item.title}
+            </p>
+            <div className="mt-1 space-y-0.5">
+              {item.children
+                ?.filter(child => hasPermission(child.permissions))
+                .map(child => (
+                  <Link
+                    key={child.path}
+                    to={child.path}
+                    onClick={() => setPopoverOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 pl-3 pr-2 py-1.5 text-sm rounded-md border-l-2 border-primary transition-colors',
+                      location.pathname === child.path
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                        : 'text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    )}
+                  >
+                    <child.icon className="h-3.5 w-3.5 shrink-0" />
+                    <span>{child.title}</span>
+                  </Link>
+                ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      </SidebarMenuItem>
+    );
+  }
+
+  // Normal expanded sidebar rendering
+  return (
+    <div>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild={!hasChildren}
+          isActive={isActive}
+          tooltip={item.title}
+          className="transition-all duration-300 ease-in-out"
+          onClick={hasChildren ? () => setExpanded(e => !e) : undefined}
+        >
+          {hasChildren ? (
+            <>
+              <item.icon className="h-4 w-4 flex-shrink-0 group-data-[collapsible=icon]:mx-auto" />
+              <span className="group-data-[collapsible=icon]:hidden transition-opacity duration-300 ease-in-out">
+                {item.title}
+              </span>
+              <div className="ml-auto group-data-[collapsible=icon]:hidden">
+                <ChevronRight className={`h-4 w-4 transition-transform duration-200 ease-in-out ${expanded ? 'rotate-90' : 'rotate-0'}`} />
+              </div>
+            </>
+          ) : (
+            <Link
+              to={item.path}
+              className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 ease-in-out"
+            >
+              <item.icon className="h-4 w-4 flex-shrink-0" />
+              <span className="group-data-[collapsible=icon]:hidden transition-opacity duration-300 ease-in-out">
+                {item.title}
+              </span>
+            </Link>
+          )}
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      {hasChildren && expanded && (
+        <div className="ml-2 border-l border-border group-data-[collapsible=icon]:hidden">
+          {item.children?.map((child) => (
+            <div key={child.path} className="ml-2">
+              <MenuItem item={child} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
   usePageTitle();
   const navigationItems = getSidebarRoutes();
   const allRoutes = getAllRoutes().filter(r => r.showInSidebar);
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
 
@@ -74,24 +195,6 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
     }
   };
 
-  const toggleExpanded = (path: string) => {
-    const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(path)) {
-      newExpanded.delete(path);
-    } else {
-      newExpanded.add(path);
-    }
-    setExpandedItems(newExpanded);
-  };
-
-  const isPathActive = (path: string, hasChildren: boolean = false): boolean => {
-    if (hasChildren) {
-      return location.pathname.startsWith(path);
-    } else {
-      return location.pathname === path;
-    }
-  };
-
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
@@ -103,62 +206,6 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
-
-  const renderMenuItem = (item: RouteConfig) => {
-    if (!hasPermission(item.permissions)) {
-      return null;
-    }
-
-    const isExpanded = expandedItems.has(item.path);
-    const hasChildren = item.isParent && item.children && item.children.length > 0;
-    const isActive = isPathActive(item.path, hasChildren);
-
-    return (
-      <div key={item.path}>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild={!hasChildren}
-            isActive={isActive}
-            tooltip={item.title}
-            className='transition-all duration-300 ease-in-out'
-            onClick={() => hasChildren ? toggleExpanded(item.path) : null}
-          >
-            {hasChildren ? (
-              <>
-                <item.icon className="h-4 w-4 flex-shrink-0 group-data-[collapsible=icon]:mx-auto" />
-                <span className="group-data-[collapsible=icon]:hidden transition-opacity duration-300 ease-in-out">
-                  {item.title}
-                </span>
-                <div className="ml-auto group-data-[collapsible=icon]:hidden">
-                  <ChevronRight className={`h-4 w-4 transition-transform duration-200 ease-in-out ${isExpanded ? 'rotate-90' : 'rotate-0'}`} />
-                </div>
-              </>
-            ) : (
-              <Link
-                to={item.path}
-                className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-300 ease-in-out"
-              >
-                <item.icon className="h-4 w-4 flex-shrink-0" />
-                <span className="group-data-[collapsible=icon]:hidden transition-opacity duration-300 ease-in-out">
-                  {item.title}
-                </span>
-              </Link>
-            )}
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-
-        {hasChildren && isExpanded && (
-          <div className="ml-2 border-l border-border group-data-[collapsible=icon]:hidden">
-            {item.children?.map((child) => (
-              <div key={child.path} className="ml-2">
-                {renderMenuItem(child)}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -192,7 +239,9 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navigationItems.map((item) => renderMenuItem(item))}
+                {navigationItems.map((item) => (
+                  <MenuItem key={item.path} item={item} />
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
