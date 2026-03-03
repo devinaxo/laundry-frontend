@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getFrequentClients, getTopClients } from '@/api/getFetches';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/shadcn-io/spinner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trophy, Users, Phone, Clock, DollarSign, ListOrdered, FileText } from 'lucide-react';
-import { FilePdfIcon } from "@phosphor-icons/react";
-import { toast } from 'sonner';
-import { getTopClients, getFrequentClients } from '@/api/getFetches';
-import type { TopClientsResponse, FrequentClientsResponse } from '@/types/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
-import type { DateRange } from 'react-day-picker';
+import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import type { FrequentClientsResponse, TopClientsResponse } from '@/types/api';
+import { FilePdfIcon } from "@phosphor-icons/react";
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
+import { Clock, DollarSign, ListOrdered, Phone, Trophy, Users } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
+import { toast } from 'sonner';
 import { ClientsPDFReport } from './pdf/ClientsPDFReport';
 
 const ClientsTab: React.FC = () => {

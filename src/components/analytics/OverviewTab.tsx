@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, ArrowUpRight, ArrowDownRight, BarChart3, FileText } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, ArrowUpRight, ArrowDownRight, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOverview, getStatusDistribution, getDailyStats } from '@/api/getFetches';
 import type { OverviewMetrics, StatusDistributionResponse, DailyStats } from '@/types/api';

@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Spinner } from '@/components/ui/shadcn-io/spinner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, TrendingUp, BarChart3, FileText } from 'lucide-react';
-import { toast } from 'sonner';
 import { getOrdersPerMonth, getYearlyComparison } from '@/api/getFetches';
-import type { OrdersPerMonth, YearlyComparison } from '@/types/api';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
-import { TrendsPDFReport } from './pdf/TrendsPDFReport';
+import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import type { OrdersPerMonth, YearlyComparison } from '@/types/api';
 import { FilePdfIcon } from '@phosphor-icons/react';
+import { BarChart3, Calendar, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { TrendsPDFReport } from './pdf/TrendsPDFReport';
 
 const TrendsTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
