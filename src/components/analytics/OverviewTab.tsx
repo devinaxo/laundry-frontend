@@ -10,6 +10,7 @@ import { statusLabels } from '@/components/orders/statuses';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import type { DateRange } from 'react-day-picker';
 import { format, eachDayOfInterval } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { ZoomableChart } from '@/components/ui/zoomableChart';
 import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
 import { OverviewPDFReport } from './pdf/OverviewPDFReport';
@@ -192,8 +193,8 @@ const OverviewDataSection: React.FC<OverviewDataSectionProps> = ({ dateRange, sh
               statusDist={statusDist}
               dailyStats={dailyStats}
               dateRange={{
-                from: dateRange.from,
-                to: dateRange.to
+                from: format(dateRange.from, "d 'de' MMMM 'de' yyyy", { locale: es }),
+                to: format(dateRange.to, "d 'de' MMMM 'de' yyyy", { locale: es })
               }}
             />
           }

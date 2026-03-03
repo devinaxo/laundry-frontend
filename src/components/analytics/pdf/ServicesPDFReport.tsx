@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import type { PopularServicesResponse, CategoryRevenueResponse } from '@/types/api';
 import { pdfStyles } from '@/lib/pdfStyles';
-import { formatCurrency, formatDate } from '@/lib/pdfUtils';
+import { formatCurrency } from '@/lib/pdfUtils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -10,8 +10,8 @@ interface ServicesPDFReportProps {
     popularServices: PopularServicesResponse;
     categoryRevenue: CategoryRevenueResponse;
     dateRange: {
-        from: Date;
-        to: Date;
+        from: string;
+        to: string;
     };
     limit: number;
 }
@@ -32,7 +32,7 @@ export const ServicesPDFReport: React.FC<ServicesPDFReportProps> = ({
                     <Text style={pdfStyles.title}>Reporte de Servicios</Text>
                     <Text style={pdfStyles.subtitle}>Lavandería del 13</Text>
                     <Text style={pdfStyles.dateRange}>
-                        Período: {formatDate(dateRange.from)} — {formatDate(dateRange.to)}
+                        Período: {dateRange.from} — {dateRange.to}
                     </Text>
                 </View>
 

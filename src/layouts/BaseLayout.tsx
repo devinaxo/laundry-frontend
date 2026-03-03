@@ -255,7 +255,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
 
       <SidebarInset>
         {/* ── Site Header ── */}
-        <header className="flex h-14 items-center gap-3 border-b border-border/50 bg-background/80 backdrop-blur-sm px-4 sticky top-0 z-10">
+        <header className="flex h-14 items-center gap-3 border-b border-sidebar-border bg-background/80 backdrop-blur-sm px-4 sticky top-0 z-10">
           <SidebarTrigger className="h-8 w-8" />
           <Separator orientation="vertical" className="h-5" />
 

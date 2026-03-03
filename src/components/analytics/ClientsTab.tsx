@@ -10,6 +10,7 @@ import type { TopClientsResponse, FrequentClientsResponse } from '@/types/api';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import type { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
 import { ClientsPDFReport } from './pdf/ClientsPDFReport';
 
@@ -159,8 +160,8 @@ const ClientsDataSection: React.FC<ClientsDataSectionProps> = ({ dateRange, limi
               topClients={topClients}
               frequentClients={frequentClients}
               dateRange={{
-                from: dateRange.from,
-                to: dateRange.to
+                from: format(dateRange.from, "d 'de' MMMM 'de' yyyy", { locale: es }),
+                to: format(dateRange.to, "d 'de' MMMM 'de' yyyy", { locale: es })
               }}
               limit={limit}
             />

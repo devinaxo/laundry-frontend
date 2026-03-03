@@ -92,7 +92,7 @@ export const routes: RouteConfig[] = [
     {
         path: '/',
         component: Dashboard,
-        title: 'Dashboard',
+        title: 'Panel de Gestión',
         icon: Home,
         showInSidebar: true,
         requiresAuth: true,
@@ -204,8 +204,8 @@ export const routes: RouteConfig[] = [
         ],
     },
     {
-        path: '/categories',
-        title: 'Categorías de Items',
+        path: '/catalogues',
+        title: 'Catálogos',
         icon: Package,
         showInSidebar: true,
         requiresAuth: true,
@@ -213,7 +213,7 @@ export const routes: RouteConfig[] = [
         isParent: true,
         children: [
             {
-                path: '/list',
+                path: '/categories/list',
                 component: CategoriesList,
                 title: 'Ver categorías',
                 icon: Package,
@@ -222,7 +222,7 @@ export const routes: RouteConfig[] = [
                 permissions: [Permission.VIEW_CATEGORIES],
             },
             {
-                path: '/new',
+                path: '/categories/new',
                 component: NewCategory,
                 title: 'Agregar categoría',
                 icon: PackagePlus,
@@ -230,19 +230,8 @@ export const routes: RouteConfig[] = [
                 requiresAuth: true,
                 permissions: [Permission.CREATE_CATEGORIES],
             },
-        ],
-    },
-    {
-        path: '/subcategories',
-        title: 'Subcategorías de Items',
-        icon: Package,
-        showInSidebar: true,
-        requiresAuth: true,
-        permissions: [Permission.VIEW_SUBCATEGORIES],
-        isParent: true,
-        children: [
             {
-                path: '/list',
+                path: '/subcategories/list',
                 component: SubcategoriesList,
                 title: 'Ver subcategorías',
                 icon: Package,
@@ -251,7 +240,7 @@ export const routes: RouteConfig[] = [
                 permissions: [Permission.VIEW_SUBCATEGORIES],
             },
             {
-                path: '/new',
+                path: '/subcategories/new',
                 component: NewSubcategory,
                 title: 'Agregar subcategoría',
                 icon: PackagePlus,
