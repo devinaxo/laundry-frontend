@@ -62,6 +62,9 @@ import { toast } from 'sonner';
 import { statusColors, statusLabels } from '@/components/orders/statuses';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { formatDateOnly, formatDateTime } from '@/lib/utils';
+import { DateRangePicker } from '@/components/ui/DateRangePicker';
+import type { DateRange } from 'react-day-picker';
+import { format } from 'date-fns';
 
 const columnHelper = createColumnHelper<Order>();
 
@@ -93,7 +96,7 @@ function OrderActions({ order, onEditOrder, onMarkAsDelivered, onViewDetails, vi
           <MoreVertical className="h-4 w-4 text-foreground" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-popover border-border">
+      <DropdownMenuContent align="end" className="bg-popover border-sidebar-border">
         {viewMode === 'table' && (
           <DropdownMenuItem
             onClick={() => {
@@ -232,8 +235,7 @@ export default function OrdersList() {
   const [perPage] = useState(12);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dateFromFilter, setDateFromFilter] = useState('');
-  const [dateToFilter, setDateToFilter] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -587,8 +589,8 @@ export default function OrdersList() {
         per_page: perPage,
         search: debouncedSearch || undefined,
         status: statusFilter && statusFilter !== 'all' ? (statusFilter as 'pending' | 'in_progress' | 'ready' | 'delivered' | 'cancelled') : undefined,
-        fecha_desde: dateFromFilter || undefined,
-        fecha_hasta: dateToFilter || undefined,
+        fecha_desde: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
+        fecha_hasta: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
       });
       setPaginationData(ordersData);
     } catch (err) {
@@ -597,17 +599,17 @@ export default function OrdersList() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, perPage, debouncedSearch, statusFilter, dateFromFilter, dateToFilter]);
+  }, [currentPage, perPage, debouncedSearch, statusFilter, dateRange]);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
   useEffect(() => {
-    if ((statusFilter && statusFilter !== 'all') || dateFromFilter || dateToFilter) {
+    if ((statusFilter && statusFilter !== 'all') || dateRange?.from || dateRange?.to) {
       setCurrentPage(1);
     }
-  }, [statusFilter, dateFromFilter, dateToFilter]);
+  }, [statusFilter, dateRange]);
 
   if (error) {
     return (
@@ -642,7 +644,7 @@ export default function OrdersList() {
           onViewModeChange={setViewMode}
         />
       </div>
-      <div className="flex flex-wrap items-center gap-4 p-4 bg-card border border-border rounded-lg">
+      <div className="flex flex-wrap items-center gap-4 p-4 bg-card border border-sidebar-border rounded-lg">
         <div className="relative flex-1 min-w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -667,31 +669,14 @@ export default function OrdersList() {
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-2">
-          <Input
-            type="date"
-            placeholder="Desde"
-            value={dateFromFilter}
-            onChange={(e) => setDateFromFilter(e.target.value)}
-            className="w-26"
-          />
-          <span className="text-muted-foreground">hasta</span>
-          <Input
-            type="date"
-            placeholder="Hasta"
-            value={dateToFilter}
-            onChange={(e) => setDateToFilter(e.target.value)}
-            className="w-26"
-          />
-        </div>
+        <DateRangePicker date={dateRange} onDateChange={setDateRange} noDefaultDate />
 
-        {((statusFilter && statusFilter !== 'all') || dateFromFilter || dateToFilter) && (
+        {((statusFilter && statusFilter !== 'all') || dateRange?.from || dateRange?.to) && (
           <Button
             variant="outline"
             onClick={() => {
               setStatusFilter('all');
-              setDateFromFilter('');
-              setDateToFilter('');
+              setDateRange(undefined);
             }}
             className="text-sm"
           >
@@ -701,11 +686,11 @@ export default function OrdersList() {
       </div>
 
       {viewMode === 'table' ? (
-        <div className="rounded-lg border border-border bg-card">
+        <div className="rounded-lg border border-sidebar-border bg-card">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-b border-border">
+                <TableRow key={headerGroup.id} className="border-b border-sidebar-border">
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
@@ -736,7 +721,7 @@ export default function OrdersList() {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className="border-b border-border transition-colors"
+                    className="border-b border-sidebar-border transition-colors"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="py-3">
@@ -751,7 +736,7 @@ export default function OrdersList() {
                     <div className="flex flex-col items-center gap-2">
                       <p className="text-muted-foreground">No se encontraron pedidos</p>
                       <p className="text-sm text-muted-foreground">
-                        {debouncedSearch || (statusFilter && statusFilter !== 'all') || dateFromFilter || dateToFilter
+                        {debouncedSearch || (statusFilter && statusFilter !== 'all') || dateRange?.from || dateRange?.to
                           ? 'Intenta ajustar tus filtros'
                           : 'No hay pedidos registrados'}
                       </p>
@@ -832,7 +817,7 @@ export default function OrdersList() {
                         />
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <div className="flex items-center justify-between pt-2 border-t border-sidebar-border">
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" />
                           <span>Creado: {formatDateTime(order.created_at)}</span>
@@ -886,7 +871,7 @@ export default function OrdersList() {
               <div className="text-center space-y-2">
                 <p className="text-muted-foreground">No se encontraron pedidos</p>
                 <p className="text-sm text-muted-foreground">
-                  {debouncedSearch || (statusFilter && statusFilter !== 'all') || dateFromFilter || dateToFilter
+                  {debouncedSearch || (statusFilter && statusFilter !== 'all') || dateRange?.from || dateRange?.to
                     ? 'Intenta ajustar tus filtros'
                     : 'No hay pedidos registrados'}
                 </p>

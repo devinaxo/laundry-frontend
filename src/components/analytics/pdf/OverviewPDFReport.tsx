@@ -5,15 +5,15 @@ import { statusLabels } from '@/components/orders/statuses';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { pdfStyles } from '@/lib/pdfStyles';
-import { formatCurrency, formatPercentage, getStatusColor, formatDate } from '@/lib/pdfUtils';
+import { formatCurrency, formatPercentage, getStatusColor, parseLocalDate } from '@/lib/pdfUtils';
 
 interface OverviewPDFReportProps {
     overview: OverviewMetrics;
     statusDist: StatusDistributionResponse;
     dailyStats: DailyStats;
     dateRange: {
-        from: Date;
-        to: Date;
+        from: string;
+        to: string;
     };
 }
 
@@ -34,7 +34,7 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
                     <Text style={pdfStyles.title}>Reporte de Resumen Ejecutivo</Text>
                     <Text style={pdfStyles.subtitle}>Lavandería del 13</Text>
                     <Text style={pdfStyles.dateRange}>
-                        Período: {formatDate(dateRange.from)} — {formatDate(dateRange.to)}
+                        Período: {dateRange.from} — {dateRange.to}
                     </Text>
                 </View>
 
@@ -177,7 +177,7 @@ export const OverviewPDFReport: React.FC<OverviewPDFReportProps> = ({
                             {sortedDailyData.map((day, index) => (
                                 <View key={index} style={pdfStyles.tableRow}>
                                     <Text style={[pdfStyles.tableCell, pdfStyles.tableCellDate]}>
-                                        {format(new Date(day.date), "d 'de' MMM yyyy", { locale: es })}
+                                        {format(parseLocalDate(day.date), "d 'de' MMM yyyy", { locale: es })}
                                     </Text>
                                     <Text style={[pdfStyles.tableCell, pdfStyles.tableCellOrders]}>
                                         {day.total_orders}

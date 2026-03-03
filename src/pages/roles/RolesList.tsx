@@ -54,7 +54,7 @@ function UserActions({ role, onEditRole }: UserActionsProps) {
                     <MoreVertical className="h-4 w-4 text-foreground" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-popover border-border">
+            <DropdownMenuContent align="end" className="bg-popover border-sidebar-border">
                 <DropdownMenuItem
                     onClick={() => onEditRole(role)}
                     className="cursor-pointer hover:bg-accent focus:bg-accent"
@@ -284,11 +284,11 @@ export default function RolesList() {
                 </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card">
+            <div className="rounded-lg border border-sidebar-border bg-card">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="border-b border-border">
+                            <TableRow key={headerGroup.id} className="border-b border-sidebar-border">
                                 {headerGroup.headers.map((header) => (
                                     <TableHead key={header.id}>
                                         {header.isPlaceholder
@@ -319,7 +319,7 @@ export default function RolesList() {
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && 'selected'}
-                                    className="border-b border-border transition-colors"
+                                    className="border-b border-sidebar-border transition-colors"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="py-3">

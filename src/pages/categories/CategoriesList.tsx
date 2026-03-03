@@ -57,7 +57,7 @@ function UserActions({ category, onEditCategory }: UserActionsProps) {
                     <MoreVertical className="h-4 w-4 text-foreground" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-popover border-border">
+            <DropdownMenuContent align="end" className="bg-popover border-sidebar-border">
                 <DropdownMenuItem
                     onClick={() => onEditCategory(category)}
                     className="cursor-pointer hover:bg-accent focus:bg-accent"
@@ -319,11 +319,11 @@ export default function CategoriesList() {
             </div>
 
             {viewMode === 'table' ? (
-                <div className="rounded-lg border border-border bg-card">
+                <div className="rounded-lg border border-sidebar-border bg-card">
                     <Table>
                         <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id} className="border-b border-border">
+                                <TableRow key={headerGroup.id} className="border-b border-sidebar-border">
                                     {headerGroup.headers.map((header) => (
                                         <TableHead key={header.id}>
                                             {header.isPlaceholder
@@ -354,7 +354,7 @@ export default function CategoriesList() {
                                     <TableRow
                                         key={row.id}
                                         data-state={row.getIsSelected() && 'selected'}
-                                        className="border-b border-border transition-colors"
+                                        className="border-b border-sidebar-border transition-colors"
                                     >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id} className="py-3">
@@ -425,7 +425,7 @@ export default function CategoriesList() {
                                                 </div>
                                             </div>
                                             
-                                            <div className="flex items-center justify-between pt-2 border-t border-border">
+                                            <div className="flex items-center justify-between pt-2 border-t border-sidebar-border">
                                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                                     <Calendar className="h-3 w-3" />
                                                     <span>Creado: {formatDateTime(category.created_at)}</span>

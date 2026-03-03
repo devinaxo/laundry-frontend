@@ -23,6 +23,7 @@ import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { toast } from 'sonner';
 import { Plus, Trash2, Calculator, ChevronsUpDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import { createOrder } from '@/api/postFetches';
 import { getClientsList, getSubcategoriesList } from '@/api/getFetches';
 import type { Client, Subcategory, CreateOrderRequest } from '@/types/api';
@@ -48,7 +49,7 @@ const NewOrder: React.FC = () => {
 
     const [formData, setFormData] = useState({
         client_id: '',
-        reception_date: new Date().toISOString().split('T')[0],
+        reception_date: format(new Date(), 'yyyy-MM-dd'),
         notes: ''
     });
 

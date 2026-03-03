@@ -297,7 +297,7 @@ const Dashboard: React.FC = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b text-muted-foreground text-xs uppercase tracking-wide">
+                        <tr className="border-b border-sidebar-primary text-muted-foreground text-xs uppercase tracking-wide">
                           <th className="text-left font-medium px-6 py-2">Pedido</th>
                           <th className="text-left font-medium px-3 py-2">Cliente</th>
                           <th className="text-left font-medium px-3 py-2 hidden sm:table-cell">Fecha</th>
@@ -310,7 +310,7 @@ const Dashboard: React.FC = () => {
                           <tr
                             key={order.id}
                             onClick={() => handleViewOrderDetails(order)}
-                            className="border-b last:border-0 hover:bg-muted/50 cursor-pointer transition-colors"
+                            className="border-b border-sidebar-border last:border-0 hover:bg-muted/50 cursor-pointer transition-colors"
                           >
                             <td className="px-6 py-3 font-medium text-foreground">
                               #{order.order_number}

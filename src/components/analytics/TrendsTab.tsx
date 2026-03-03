@@ -10,6 +10,7 @@ import { getOrdersPerMonth, getYearlyComparison } from '@/api/getFetches';
 import type { OrdersPerMonth, YearlyComparison } from '@/types/api';
 import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
 import { TrendsPDFReport } from './pdf/TrendsPDFReport';
+import { FilePdfIcon } from '@phosphor-icons/react';
 
 const TrendsTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -115,7 +116,7 @@ const TrendsTab: React.FC = () => {
                 onClick={() => setShowPDFModal(true)}
                 className="gap-2"
               >
-                <FileText className="h-4 w-4" />
+                <FilePdfIcon className="h-4 w-4" />
                 Generar PDF
               </Button>
               <Calendar className="h-4 w-4 text-muted-foreground" />

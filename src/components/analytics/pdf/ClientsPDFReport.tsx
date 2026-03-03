@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import type { TopClientsResponse, FrequentClientsResponse } from '@/types/api';
 import { pdfStyles } from '@/lib/pdfStyles';
-import { formatCurrency, formatDate } from '@/lib/pdfUtils';
+import { formatCurrency, parseLocalDate } from '@/lib/pdfUtils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -10,8 +10,8 @@ interface ClientsPDFReportProps {
     topClients: TopClientsResponse;
     frequentClients: FrequentClientsResponse;
     dateRange: {
-        from: Date;
-        to: Date;
+        from: string;
+        to: string;
     };
     limit: number;
 }
@@ -24,7 +24,10 @@ export const ClientsPDFReport: React.FC<ClientsPDFReportProps> = ({
 }) => {
     const formatSafeDate = (dateString: string, formatStr: string = "d 'de' MMM yyyy") => {
         try {
-            const date = new Date(dateString);
+            // Parse date-only strings as local midnight to avoid UTC offset issues
+            const date = /^\d{4}-\d{2}-\d{2}$/.test(dateString)
+                ? parseLocalDate(dateString)
+                : new Date(dateString);
             if (isNaN(date.getTime())) {
                 return 'Fecha no disponible';
             }
@@ -44,7 +47,7 @@ export const ClientsPDFReport: React.FC<ClientsPDFReportProps> = ({
                     <Text style={pdfStyles.title}>Reporte de Clientes</Text>
                     <Text style={pdfStyles.subtitle}>Lavandería del 13</Text>
                     <Text style={pdfStyles.dateRange}>
-                        Período: {formatDate(dateRange.from)} — {formatDate(dateRange.to)}
+                        Período: {dateRange.from} — {dateRange.to}
                     </Text>
                 </View>
 

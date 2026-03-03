@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trophy, Users, Phone, Clock, DollarSign, ListOrdered, FileText } from 'lucide-react';
+import { FilePdfIcon } from "@phosphor-icons/react";
 import { toast } from 'sonner';
 import { getTopClients, getFrequentClients } from '@/api/getFetches';
 import type { TopClientsResponse, FrequentClientsResponse } from '@/types/api';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import type { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { PDFPreviewModal } from '@/components/ui/PDFPreviewModal';
 import { ClientsPDFReport } from './pdf/ClientsPDFReport';
 
@@ -34,7 +36,7 @@ const ClientsTab: React.FC = () => {
                 onClick={() => setShowPDFModal(true)}
                 className="gap-2"
               >
-                <FileText className="h-4 w-4" />
+                <FilePdfIcon className="h-4 w-4" />
                 Generar PDF
               </Button>
             )}
@@ -159,8 +161,8 @@ const ClientsDataSection: React.FC<ClientsDataSectionProps> = ({ dateRange, limi
               topClients={topClients}
               frequentClients={frequentClients}
               dateRange={{
-                from: dateRange.from,
-                to: dateRange.to
+                from: format(dateRange.from, "d 'de' MMMM 'de' yyyy", { locale: es }),
+                to: format(dateRange.to, "d 'de' MMMM 'de' yyyy", { locale: es })
               }}
               limit={limit}
             />

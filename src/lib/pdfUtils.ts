@@ -25,3 +25,13 @@ export const getStatusColor = (status: string) => {
 export const formatDate = (date: Date) => {
     return format(date, "d 'de' MMMM 'de' yyyy", { locale: es });
 };
+
+/**
+ * Parses a date-only string ("YYYY-MM-DD") as local midnight.
+ * Using new Date("YYYY-MM-DD") treats it as UTC midnight which causes
+ * a one-day-behind display in negative UTC offsets (e.g. GMT-3).
+ */
+export const parseLocalDate = (dateStr: string): Date => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+};
